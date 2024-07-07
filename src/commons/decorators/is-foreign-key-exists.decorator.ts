@@ -1,21 +1,13 @@
-import { registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
-import { PrismaClient } from '@prisma/client';
-
-const prisma: any = new PrismaClient();
+import { registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint } from 'class-validator';
+import { DatabaseConstraint } from '../constraints/database.constraint'
 
 @ValidatorConstraint({ async: true })
-export class IsForeignKeyExistsConstraint implements ValidatorConstraintInterface {
-    async validate(value: any, args: ValidationArguments) {
-        const [entity, property] = args.constraints;
-        const record = await prisma[entity].findUnique({
-            where: {
-                [property]: value,
-            },
-        });
+export class IsForeignKeyExistsConstraint extends DatabaseConstraint {
+    checkRecord(record: any): boolean {
         return !!record;
     }
 
-    defaultMessage(args: ValidationArguments) {
+    defaultMessage(args: ValidationArguments): string {
         return `La valeur de la propriété ${args.property} n'existe pas dans la base de données.`;
     }
 }
