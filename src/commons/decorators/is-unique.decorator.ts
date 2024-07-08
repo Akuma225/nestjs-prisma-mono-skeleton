@@ -1,5 +1,7 @@
 import { registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint } from 'class-validator';
 import { DatabaseConstraint } from '../constraints/database.constraint'
+import { IsUniqueMode } from '../enums/is_unique_mode.enum';
+import { ModelMappingTable } from '../enums/model-mapping.enum';
 
 @ValidatorConstraint({ async: true })
 export class IsUniqueConstraint extends DatabaseConstraint {
@@ -12,13 +14,13 @@ export class IsUniqueConstraint extends DatabaseConstraint {
     }
 }
 
-export function IsUnique(entity: string, property: string, validationOptions?: ValidationOptions) {
+export function IsUnique(entity: ModelMappingTable, property: string, mode: IsUniqueMode = IsUniqueMode.DEFAULT, validationOptions?: ValidationOptions) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
             target: object.constructor,
             propertyName: propertyName,
             options: validationOptions,
-            constraints: [entity, property],
+            constraints: [entity, property, mode],
             validator: IsUniqueConstraint,
         });
     };
