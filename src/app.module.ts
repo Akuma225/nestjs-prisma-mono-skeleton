@@ -10,16 +10,20 @@ import { AuthModule } from './resources/auth/auth.module';
 import { SecurityService } from './commons/services/security.service';
 import { ViewmodelServiceProvider } from './commons/providers/viewmodelservice.provider';
 import { ViewmodelService } from './commons/services/viewmodel.service';
+import { ProductModule } from './resources/product/product.module';
+import { CategoryModule } from './resources/category/category.module';
 
 @Global() // Marque le module comme global
 @Module({
   imports: [
-  ConfigModule.forRoot({
+    ConfigModule.forRoot({
       isGlobal: true, // Assurez-vous que le ConfigModule est global
     }),
-    
+
     // Modules de ressources
-    AuthModule
+    AuthModule,
+    ProductModule,
+    CategoryModule,
   ],
   providers: [
     {
@@ -39,8 +43,8 @@ import { ViewmodelService } from './commons/services/viewmodel.service';
   exports: [PrismaService, SecurityService, ViewmodelServiceProvider, ViewmodelService], // Exporte les services globaux
 })
 export class AppModule implements OnModuleInit {
-  
-  constructor(private readonly viewmodelService: ViewmodelService) {}
+
+  constructor(private readonly viewmodelService: ViewmodelService) { }
 
   configure(consumer: MiddlewareConsumer) {
     consumer

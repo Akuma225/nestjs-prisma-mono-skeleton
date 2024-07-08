@@ -34,6 +34,37 @@ model users {
   deleted_by       String?
 }
 
+model categories {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String
+  description String?    @db.Text
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  deleted_at  DateTime?
+  created_by  String?
+  updated_by  String?
+  deleted_by  String?
+  products    products[]
+}
+
+model products {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String
+  description String?    @db.Text
+  price       Int
+  image       String?
+  category_id String
+  category    categories @relation(fields: [category_id], references: [id])
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  deleted_at  DateTime?
+  created_by  String?
+  updated_by  String?
+  deleted_by  String?
+}
+
 enum Profile {
   CLIENT
   ADMIN

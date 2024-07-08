@@ -9,7 +9,8 @@ export abstract class DatabaseConstraint implements ValidatorConstraintInterface
         const [entity, property, mode] = args.constraints;
         const record = await prisma[entity].findUnique({
             where: {
-                [property]: property === 'id' ? value : { equals: value, mode },
+                //[property]: property === 'id' ? value : { equals: value, mode },
+                [property]: value,
             },
         });
         return this.checkRecord(record);
