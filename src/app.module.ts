@@ -12,6 +12,9 @@ import { ViewmodelServiceProvider } from './commons/providers/viewmodelservice.p
 import { ViewmodelService } from './commons/services/viewmodel.service';
 import { ProductModule } from './resources/product/product.module';
 import { CategoryModule } from './resources/category/category.module';
+import { PrismaServiceProvider } from './commons/providers/prismaservice.provider';
+import { PaginationService } from './commons/services/pagination.service';
+import { PaginationServiceProvider } from './commons/providers/paginationservice.provider';
 
 @Global() // Marque le module comme global
 @Module({
@@ -35,16 +38,23 @@ import { CategoryModule } from './resources/category/category.module';
       useClass: IdentificationGuard,
     },
     PrismaService,
-    SecurityService,
-    BootstrapService,
+    PrismaServiceProvider,
     ViewmodelService,
-    ViewmodelServiceProvider
+    ViewmodelServiceProvider,
+    PaginationService,
+    PaginationServiceProvider,
+    SecurityService,
+    BootstrapService
   ],
-  exports: [PrismaService, SecurityService, ViewmodelServiceProvider, ViewmodelService], // Exporte les services globaux
+  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, SecurityService], // Exporte les services globaux
 })
 export class AppModule implements OnModuleInit {
 
-  constructor(private readonly viewmodelService: ViewmodelService) { }
+  constructor(
+    private readonly viewmodelService: ViewmodelService,
+    private readonly prismaService: PrismaService,
+    private readonly paginationService: PaginationService,
+  ) { }
 
   configure(consumer: MiddlewareConsumer) {
     consumer
@@ -54,5 +64,7 @@ export class AppModule implements OnModuleInit {
 
   onModuleInit() {
     ViewmodelServiceProvider.setViewmodelService(this.viewmodelService);
+    PrismaServiceProvider.setPrismaService(this.prismaService);
+    PaginationServiceProvider.setPaginationService(this.paginationService);
   }
 }
