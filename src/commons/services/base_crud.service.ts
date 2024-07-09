@@ -134,7 +134,7 @@ export class BaseCRUDService<T> {
     try {
       return await this.model.update({
         where: { id },
-        data: { deletedAt: new Date() },
+        data: { deleted_at: new Date() },
       });
     } catch (error) {
       Logger.error(error);
@@ -152,7 +152,7 @@ export class BaseCRUDService<T> {
     try {
       return await this.model.update({
         where: { id },
-        data: { deletedAt: null },
+        data: { deleted_at: null },
       });
     } catch (error) {
       Logger.error(error);

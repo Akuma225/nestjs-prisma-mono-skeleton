@@ -9,7 +9,7 @@ import { SecurityService } from 'src/commons/services/security.service'
 
 @Injectable()
 export class IdentificationGuard implements CanActivate {
-  constructor(private securityService: SecurityService) {}
+  constructor(private securityService: SecurityService) { }
 
   async canActivate(context: ExecutionContext) {
     Logger.log('Launching Identification Guard...')
@@ -43,7 +43,7 @@ export class IdentificationGuard implements CanActivate {
 
     // Ajouter les données de l'utilisateur à la requête
 
-    request.user = resultJwt
+    request.user = resultJwt.sub
     request.extended_audit = true
 
     return true

@@ -1,12 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, HttpException, HttpStatus } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ModelMappingTable } from 'src/commons/enums/model-mapping.enum';
-import { IsDataExist } from 'src/commons/decorators/is-data-exist.decorator';
 import { CategoryVm } from 'src/commons/shared/viewmodels/category.vm';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { CustomRequest } from 'src/commons/interfaces/custom_request';
+import { ParamId } from 'src/commons/decorators/param-id.decorator';
 
 @Controller('categories')
 export class CategoryController {
@@ -19,20 +19,20 @@ export class CategoryController {
 
   @Get()
   @Pagination()
-  findAll(
+  async findAll(
     @Req() req: CustomRequest,
   ) {
-    return this.categoryService.findAll(req.pagination);
+    return CategoryVm.createPaginated(await this.categoryService.findAll(req.pagination));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return CategoryVm.create(await this.categoryService.findOne(id));
   }
 
   @Patch(':id')
   async update(
-    @IsDataExist({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" })
+    @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" })
     id: string,
     @Body() updateCategoryDto: UpdateCategoryDto
   ) {
@@ -40,7 +40,20 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(id);
+  async remove(@ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string) {
+    await this.categoryService.remove(id);
+
+    // Return success message with status code 204
+    throw new HttpException("La catégorie a été définitivement supprimée !", HttpStatus.NO_CONTENT);
+  }
+
+  @Delete(':id/soft')
+  async softDelete(@ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string) {
+    return await this.categoryService.softDelete(id);
+  }
+
+  @Patch(':id/restore')
+  async restore(@ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string) {
+    return CategoryVm.create(await this.categoryService.restore(id));
   }
 }

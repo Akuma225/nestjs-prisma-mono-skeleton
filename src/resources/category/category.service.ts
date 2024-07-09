@@ -28,7 +28,7 @@ export class CategoryService extends BaseCRUDService<Category> {
     });
   }
 
-  findAll(params?: IPaginationParams | undefined,) {
+  findAll(params?: IPaginationParams | undefined) {
     return this.genericFindAll(params);
   }
 
@@ -42,5 +42,13 @@ export class CategoryService extends BaseCRUDService<Category> {
 
   remove(id: string) {
     return this.genericDelete(id);
+  }
+
+  softDelete(id: string) {
+    return this.genericSoftDelete(id);
+  }
+
+  restore(id: string) {
+    return this.genericRestore(id);
   }
 }

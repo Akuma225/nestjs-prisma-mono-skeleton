@@ -1,9 +1,9 @@
 import { Request } from 'express'
 import { IPaginationParams } from './pagination-params'
-import { AccessTokenData } from '../shared/entities/access-token-data.entity'
+import { UserData } from '../shared/entities/user-data.entity'
 
 export interface CustomRequest extends Request {
   pagination: IPaginationParams
-  user: AccessTokenData
+  user: UserData
   extended_audit: boolean
 }
