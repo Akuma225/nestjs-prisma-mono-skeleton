@@ -22,7 +22,8 @@ export class PaginationService {
     where: any,
     include: any,
     orderBy: any[],
-    params: IPaginationParams
+    params: IPaginationParams,
+    searchables?: string[]
   ): Promise<PaginationVm> {
     const DEFAULT_LIMIT = 10
     const DEFAULT_PAGE = 1
@@ -51,6 +52,12 @@ export class PaginationService {
 
     if (params.order) {
       orderBy = this.generateOrderBy(params)
+    }
+
+    // If search parameter is provided, filter the data based on the searchables array.
+
+    if (params.search && searchables) {
+      where = this.generateSearchQuery(params.search, searchables, where);
     }
 
     // If the all parameter is set to true, return all results without pagination.
@@ -143,5 +150,51 @@ export class PaginationService {
     })
 
     return orderBy
+  }
+
+  createNestedSearchObject(path: string[], value: string): any {
+    if (path.length === 1) {
+      return {
+        [path[0]]: {
+          contains: value,
+          mode: 'insensitive',
+        },
+      };
+    }
+    const key = path.shift();
+    return {
+      [key]: this.createNestedSearchObject(path, value),
+    };
+  }
+
+  mergeORWhereClauses(initialWhere: any, anotherWhere: any): any {
+    if (!initialWhere || Object.keys(anotherWhere).length === 0) {
+      return initialWhere;
+    }
+
+    if (!initialWhere.OR) {
+      return {
+        ...initialWhere,
+        OR: anotherWhere.OR,
+      };
+    }
+
+    return {
+      ...initialWhere,
+      OR: [...initialWhere.OR, ...anotherWhere.OR]
+    };
+  }
+
+  generateSearchQuery(search: string, searchables: string[], currentWhere: any): any {
+    Logger.log(`Searching for ${search} in ${searchables.join(', ')}`);
+    const searchConditions = searchables.map((searchable) => {
+      const path = searchable.split('.');
+      return this.createNestedSearchObject(path, search);
+    });
+
+    const searchWhereClause = { OR: searchConditions };
+
+    Logger.log(`Search where clause: ${JSON.stringify(searchWhereClause)}`);
+    return this.mergeORWhereClauses(currentWhere, searchWhereClause);
   }
 }

@@ -33,12 +33,14 @@ export class BaseCRUDService<T> {
     orderBy: any[] = []
   ): Promise<PaginationVm> {
     try {
+      whereClause.deleted_at = null;
       return this.paginationService.paginate(
         this.modelName,
         whereClause,
         include,
         orderBy,
-        params
+        params,
+        ['name', 'description']
       );
     } catch (error) {
       Logger.error(error);
