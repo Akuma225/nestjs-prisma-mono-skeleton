@@ -4,6 +4,8 @@ import { IPaginationParams } from '../interfaces/pagination-params';
 import { PaginationService } from './pagination.service';
 import { PaginationVm } from '../shared/viewmodels/pagination.vm';
 import { ModelMappingTable } from '../enums/model-mapping.enum';
+import { PrismaServiceProvider } from '../providers/prismaservice.provider';
+import { PaginationServiceProvider } from '../providers/paginationservice.provider';
 
 @Injectable()
 /**
@@ -12,14 +14,39 @@ import { ModelMappingTable } from '../enums/model-mapping.enum';
  * @template T - The type of the data being manipulated.
  */
 export class BaseCRUDService<T> {
-  protected readonly model: any;
+  protected readonly modelName: string
+
+  // The model to be used for CRUD operations.
+  protected model: any;
+  protected pagination: PaginationService;
+
+  // Static properties to hold the Prisma and Pagination services.
+  protected static prisma: PrismaService;
+  protected static paginationService: PaginationService;
 
   constructor(
-    protected readonly prisma: PrismaService,
-    protected readonly paginationService: PaginationService,
-    protected readonly modelName: string
+    protected readonly modelNameParam: string
   ) {
-    this.model = prisma[modelName];
+    this.modelName = modelNameParam
+  }
+
+  initModel() {
+    const prisma = BaseCRUDService.getPrismaService();
+    return prisma[this.modelName]
+  }
+
+  private static getPrismaService(): PrismaService {
+    if (!BaseCRUDService.prisma) {
+      BaseCRUDService.prisma = PrismaServiceProvider.getPrismaService();
+    }
+    return BaseCRUDService.prisma;
+  }
+
+  private static getPaginationService(): PaginationService {
+    if (!BaseCRUDService.paginationService) {
+      BaseCRUDService.paginationService = PaginationServiceProvider.getPaginationService();
+    }
+    return BaseCRUDService.paginationService;
   }
 
   /**
@@ -31,6 +58,7 @@ export class BaseCRUDService<T> {
    */
   async genericCreate(data: any): Promise<T> {
     try {
+      this.model = this.initModel()
       return await this.model.create({ data });
     } catch (error) {
       Logger.error(error);
@@ -55,8 +83,11 @@ export class BaseCRUDService<T> {
     orderBy: any[] = []
   ): Promise<PaginationVm> {
     try {
+      this.model = this.initModel()
+      this.pagination = BaseCRUDService.getPaginationService();
+
       whereClause.deleted_at = null;
-      return this.paginationService.paginate(
+      return this.pagination.paginate(
         this.modelName,
         whereClause,
         include,
@@ -79,6 +110,8 @@ export class BaseCRUDService<T> {
    */
   async genericFindOne(id: string): Promise<T> {
     try {
+      this.model = this.initModel()
+
       return await this.model.findUnique({ where: { id } });
     } catch (error) {
       Logger.error(error);
@@ -96,6 +129,8 @@ export class BaseCRUDService<T> {
    */
   async genericUpdate(id: string, data: Partial<any>): Promise<T> {
     try {
+      this.model = this.initModel()
+
       return await this.model.update({
         where: { id },
         data,
@@ -115,6 +150,8 @@ export class BaseCRUDService<T> {
    */
   async genericDelete(id: string): Promise<T> {
     try {
+      this.model = this.initModel()
+
       return await this.model.delete({
         where: { id },
       });
@@ -132,6 +169,8 @@ export class BaseCRUDService<T> {
    */
   async genericSoftDelete(id: string): Promise<T> {
     try {
+      this.model = this.initModel()
+
       return await this.model.update({
         where: { id },
         data: { deleted_at: new Date() },
@@ -150,6 +189,8 @@ export class BaseCRUDService<T> {
    */
   async genericRestore(id: string): Promise<T> {
     try {
+      this.model = this.initModel()
+
       return await this.model.update({
         where: { id },
         data: { deleted_at: null },

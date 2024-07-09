@@ -3,20 +3,16 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
 import { BaseCRUDService } from 'src/commons/services/base_crud.service';
-import { PrismaService } from 'src/commons/services/prisma.service';
 import { SlugService } from 'src/commons/services/slug.service';
-import { PaginationService } from 'src/commons/services/pagination.service';
 import { IPaginationParams } from 'src/commons/interfaces/pagination-params';
 
 @Injectable()
 export class CategoryService extends BaseCRUDService<Category> {
   constructor(
-    protected readonly prismaService: PrismaService,
-    protected readonly paginationService: PaginationService,
     protected readonly slugService: SlugService,
     @Inject('MODEL_MAPPING') modelName: string,
   ) {
-    super(prismaService, paginationService, modelName);
+    super(modelName);
   }
 
   async create(createCategoryDto: CreateCategoryDto) {
