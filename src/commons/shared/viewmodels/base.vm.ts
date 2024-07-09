@@ -71,7 +71,7 @@ export class BaseVm extends AuditVm {
     data: PaginationVm,
     extendedAudit = false,
     properties: AuditProperties[] = BaseVm.defaultAuditProperties
-  ): Promise<{ items: T[], totalCount: number }> {
+  ): Promise<PaginationVm> {
     const { result, totalCount } = data;
 
     if (!result || !Array.isArray(result)) {
@@ -89,6 +89,9 @@ export class BaseVm extends AuditVm {
     });
 
     const processedItems = await Promise.all(promises);
-    return { items: processedItems, totalCount };
+    return {
+      ...data,
+      result: processedItems,
+    };
   }
 }
