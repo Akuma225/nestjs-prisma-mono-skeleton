@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ModelMappingTable } from 'src/commons/enums/model-mapping.enum';
 import { IsDataExist } from 'src/commons/decorators/is-data-exist.decorator';
 import { CategoryVm } from 'src/commons/shared/viewmodels/category.vm';
+import { Pagination } from 'src/commons/decorators/pagination.decorator';
+import { CustomRequest } from 'src/commons/interfaces/custom_request';
 
 @Controller('categories')
 export class CategoryController {
@@ -16,8 +18,11 @@ export class CategoryController {
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  @Pagination()
+  findAll(
+    @Req() req: CustomRequest,
+  ) {
+    return this.categoryService.findAll(req.pagination);
   }
 
   @Get(':id')

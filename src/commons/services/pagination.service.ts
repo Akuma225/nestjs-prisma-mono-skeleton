@@ -22,7 +22,8 @@ export class PaginationService {
     where: any,
     include: any,
     orderBy: any[],
-    params: IPaginationParams
+    params: IPaginationParams,
+    searchables?: string[]
   ): Promise<PaginationVm> {
     const DEFAULT_LIMIT = 10
     const DEFAULT_PAGE = 1
@@ -51,6 +52,12 @@ export class PaginationService {
 
     if (params.order) {
       orderBy = this.generateOrderBy(params)
+    }
+
+    // If search parameter is provided, filter the data based on the searchables array.
+
+    if (params.search && searchables) {
+      where = this.generateSearchQuery(params.search, searchables, where);
     }
 
     // If the all parameter is set to true, return all results without pagination.
@@ -143,5 +150,74 @@ export class PaginationService {
     })
 
     return orderBy
+  }
+
+  /**
+   * Creates a nested search object based on the given path and value.
+   * @param path - An array of strings representing the path to the nested property.
+   * @param value - The value to search for.
+   * @returns The nested search object.
+   */
+  createNestedSearchObject(path: string[], value: string): any {
+    if (path.length === 1) {
+      return {
+        [path[0]]: {
+          contains: value,
+          mode: 'insensitive',
+        },
+      };
+    }
+    const key = path.shift();
+    return {
+      [key]: this.createNestedSearchObject(path, value),
+    };
+  }
+
+  /**
+   * Merges two OR where clauses into a single OR where clause.
+   * If the initial where clause is empty or the another where clause is empty, the initial where clause is returned.
+   * If the initial where clause does not have an OR property, the another where clause is added as the OR property.
+   * If the initial where clause already has an OR property, the another where clause is appended to the existing OR property.
+   * 
+   * @param initialWhere - The initial where clause.
+   * @param anotherWhere - The another where clause to merge.
+   * @returns The merged OR where clause.
+   */
+  mergeORWhereClauses(initialWhere: any, anotherWhere: any): any {
+    if (!initialWhere || Object.keys(anotherWhere).length === 0) {
+      return initialWhere;
+    }
+
+    if (!initialWhere.OR) {
+      return {
+        ...initialWhere,
+        OR: anotherWhere.OR,
+      };
+    }
+
+    return {
+      ...initialWhere,
+      OR: [...initialWhere.OR, ...anotherWhere.OR]
+    };
+  }
+
+  /**
+   * Generates a search query based on the provided search term, searchables, and current where clause.
+   * @param search - The search term to look for.
+   * @param searchables - An array of strings representing the fields to search in.
+   * @param currentWhere - The current where clause to merge the search conditions with.
+   * @returns The merged where clause with the search conditions.
+   */
+  generateSearchQuery(search: string, searchables: string[], currentWhere: any): any {
+    Logger.log(`Searching for ${search} in ${searchables.join(', ')}`);
+    const searchConditions = searchables.map((searchable) => {
+      const path = searchable.split('.');
+      return this.createNestedSearchObject(path, search);
+    });
+
+    const searchWhereClause = { OR: searchConditions };
+
+    Logger.log(`Search where clause: ${JSON.stringify(searchWhereClause)}`);
+    return this.mergeORWhereClauses(currentWhere, searchWhereClause);
   }
 }
