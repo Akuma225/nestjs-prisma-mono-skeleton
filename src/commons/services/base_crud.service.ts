@@ -1,11 +1,19 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { IPaginationParams } from '../interfaces/pagination-params';
+import { PaginationService } from './pagination.service';
+import { PaginationVm } from '../shared/viewmodels/pagination.vm';
+import { ModelMappingTable } from '../enums/model-mapping.enum';
 
 @Injectable()
 export class BaseCRUDService<T> {
   protected readonly model: any;
 
-  constructor(protected readonly prisma: PrismaService, protected readonly modelName: string) {
+  constructor(
+    protected readonly prisma: PrismaService,
+    protected readonly paginationService: PaginationService,
+    protected readonly modelName: string
+  ) {
     this.model = prisma[modelName];
   }
 
@@ -18,9 +26,20 @@ export class BaseCRUDService<T> {
     }
   }
 
-  async genericFindAll(): Promise<T[]> {
+  async genericFindAll(
+    params?: IPaginationParams | undefined,
+    whereClause: any = {},
+    include: any = {},
+    orderBy: any[] = []
+  ): Promise<PaginationVm> {
     try {
-      return await this.model.findMany();
+      return this.paginationService.paginate(
+        this.modelName,
+        whereClause,
+        include,
+        orderBy,
+        params
+      );
     } catch (error) {
       Logger.error(error);
       throw new HttpException('Error fetching records', HttpStatus.BAD_REQUEST);

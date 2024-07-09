@@ -5,15 +5,18 @@ import { Category } from './entities/category.entity';
 import { BaseCRUDService } from 'src/commons/services/base_crud.service';
 import { PrismaService } from 'src/commons/services/prisma.service';
 import { SlugService } from 'src/commons/services/slug.service';
+import { PaginationService } from 'src/commons/services/pagination.service';
+import { IPaginationParams } from 'src/commons/interfaces/pagination-params';
 
 @Injectable()
 export class CategoryService extends BaseCRUDService<Category> {
   constructor(
     protected readonly prismaService: PrismaService,
+    protected readonly paginationService: PaginationService,
     protected readonly slugService: SlugService,
     @Inject('MODEL_MAPPING') modelName: string,
   ) {
-    super(prismaService, modelName);
+    super(prismaService, paginationService, modelName);
   }
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -25,8 +28,8 @@ export class CategoryService extends BaseCRUDService<Category> {
     });
   }
 
-  findAll() {
-    return this.genericFindAll();
+  findAll(params?: IPaginationParams | undefined,) {
+    return this.genericFindAll(params);
   }
 
   findOne(id: string) {
