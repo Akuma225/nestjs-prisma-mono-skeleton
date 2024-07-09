@@ -30,11 +30,18 @@ export class ResponseInterceptor implements NestInterceptor {
       }),
       catchError((error) => {
         this.logger.error(error.message, error.stack);
+
+        let message = error.message;
+
+        if (error.response?.message) {
+          message = Array.isArray(error.response?.message) ? error.response?.message.join(', ') : error.response?.message;
+        }
+
         const throwerr = {
           error: true,
           statusCode: error.status || 500,
-          message: error.message || 'Error',
-          data: error.response?.message || null,
+          message: message || 'Error',
+          data: null,
         };
 
         this.logger.debug(throwerr);

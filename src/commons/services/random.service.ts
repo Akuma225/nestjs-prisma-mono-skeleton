@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class RandomService {
-  constructor() {}
+  constructor() { }
 
   randomArray(array, length) {
     const randomArray = [];
@@ -18,6 +18,15 @@ export class RandomService {
 
   randomInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  randomOtp(length: number) {
+    const characters = '0123456789';
+    let otp = '';
+    for (let i = 0; i < length; i++) {
+      otp += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return otp;
   }
 
   randomToken(length: number) {
