@@ -6,7 +6,7 @@ dotenv.config();
 
 @Injectable()
 export class SecurityService {
-  constructor() {}
+  constructor() { }
 
   signJwt(data: any, secret: string, expiresIn: string = '1d') {
     return jwt.sign(data, secret, { expiresIn });
