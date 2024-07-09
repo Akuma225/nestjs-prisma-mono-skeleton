@@ -3,6 +3,7 @@ import { AuditVm } from './audit.vm';
 import { ViewmodelServiceProvider } from 'src/commons/providers/viewmodelservice.provider';
 import { AuditProperties } from 'src/commons/enums/audit_properties.enum';
 import { HttpException } from '@nestjs/common';
+import { PaginationVm } from './pagination.vm';
 
 export class BaseVm extends AuditVm {
   private static viewmodelService: ViewmodelService;
@@ -67,18 +68,18 @@ export class BaseVm extends AuditVm {
 
   static async createPaginated<T extends BaseVm>(
     this: new (data: any) => T,
-    data: { items: any[], totalCount: number },
+    data: PaginationVm,
     extendedAudit = false,
     properties: AuditProperties[] = BaseVm.defaultAuditProperties
   ): Promise<{ items: T[], totalCount: number }> {
-    const { items, totalCount } = data;
+    const { result, totalCount } = data;
 
-    if (!items || !Array.isArray(items)) {
+    if (!result || !Array.isArray(result)) {
       throw new HttpException('Données introuvables ou incorrectes', 404);
     }
 
     const viewmodelService = BaseVm.getService();
-    const promises = items.map(async item => {
+    const promises = result.map(async item => {
       const additionalProperties = await viewmodelService.processAuditFields(
         item,
         extendedAudit,

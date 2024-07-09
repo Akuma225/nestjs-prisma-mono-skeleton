@@ -2,7 +2,7 @@ import { createParamDecorator, ExecutionContext, HttpException, HttpStatus, NotF
 import { ModelMappingTable } from '../enums/model-mapping.enum';
 import { PrismaService } from '../services/prisma.service';
 
-export const IsDataExist = createParamDecorator(
+export const ParamId = createParamDecorator(
     async (
         data: { key?: string, model: ModelMappingTable, property?: string, errorMessage?: string },
         ctx: ExecutionContext,
