@@ -1,9 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dtos/login.dto';
 import { RegistrationDTO } from './dtos/registration.dto';
 import { ActivateAccountDTO } from './dtos/activate-account.dto';
 import { ResetActivationOtpDTO } from './dtos/resend-activation-otp.dto';
+import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
+import { CustomRequest } from 'src/commons/interfaces/custom_request';
 
 @Controller('auth')
 export class AuthController {
@@ -27,5 +29,19 @@ export class AuthController {
   @Post('resend-activation-otp')
   async resendActivationOtp(@Body() data: ResetActivationOtpDTO) {
     return await this.authService.resendActivationOtp(data);
+  }
+
+  @Get('refresh-token')
+  async refreshToken(
+    @Query('refresh_token') refreshToken: string,
+  ) {
+    return await this.authService.refreshTokens(refreshToken);
+  }
+
+  @Get('logout')
+  @UseGuards(AuthenticationGuard)
+  async logout(@Req() req: CustomRequest) {
+    await this.authService.revokeToken(req.user.id);
+    throw new HttpException("Utilisateur déconnecté avec succès !", HttpStatus.NO_CONTENT);
   }
 }

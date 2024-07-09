@@ -10,9 +10,9 @@ export class SecurityService {
     return jwt.sign(data, secret, { expiresIn });
   }
 
-  verifyJwt(token: string, secret: string): AccessTokenData {
+  verifyJwt(token: string, secret: string) {
     try {
-      return new AccessTokenData(jwt.verify(token, secret));
+      return jwt.verify(token, secret);
     } catch (error) {
       return null;
     }

@@ -162,6 +162,54 @@ export class AuthService {
         throw new HttpException("Compte déjà activé", 401);
     }
 
+    async refreshTokens(refreshToken: string) {
+        const ACCOUNT_ACTIVATION_ENABLED = this.configService.get("ACCOUNT_ACTIVATION_ENABLED") === 'true';
+
+        const payload: any = this.securityService.verifyJwt(
+            refreshToken,
+            this.configService.get('REFRESH_TOKEN_SECRET')
+        );
+
+        if (!payload) {
+            throw new HttpException("Token invalide", 401);
+        }
+
+        const user = await this.findUserById(payload.sub.id);
+
+        if (!user) {
+            throw new HttpException("Utilisateur introuvable", 401);
+        }
+
+        if (!user.is_active) {
+            throw new HttpException("Votre compte est désactivé", 401);
+        }
+
+        if (ACCOUNT_ACTIVATION_ENABLED && !user.mail_verified_at) {
+            throw new HttpException("Votre compte n'est pas activé", 401);
+        }
+
+        if (user.auto_login_token !== payload.sub.auto_login_token) {
+            throw new HttpException("Token invalide", 401);
+        }
+
+        // Update auto login token
+        await this.updateAutoLoginToken(user.id);
+
+        // Generate access and refresh tokens
+        return await this.createAccessTokenAndRefreshToken(user.id);
+    }
+
+    async revokeToken(userId: string) {
+        await this.prismaService.users.update({
+            where: {
+                id: userId
+            },
+            data: {
+                auto_login_token: null
+            }
+        })
+    }
+
     async findUserByEmail(email: string) {
         return this.prismaService.users.findUnique({
             where: {
@@ -214,6 +262,7 @@ export class AuthService {
                 firstname: user.firstname,
                 lastname: user.lastname,
                 email: user.email,
+                auto_login_token: user.auto_login_token,
             }
         }
 
@@ -236,7 +285,7 @@ export class AuthService {
 
         const autoLoginToken = this.randomService.randomToken(AUTO_LOGIN_TOKEN_LENGTH);
 
-        this.prismaService.users.update({
+        await this.prismaService.users.update({
             where: {
                 id: userId
             },
