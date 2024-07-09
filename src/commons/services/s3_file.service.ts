@@ -1,13 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
 import { ModelMappingPrefix } from '../enums/model-mapping.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class S3FileService {
-  constructor() {}
+  constructor(
+    private configService: ConfigService,
+  ) { }
+
   private readonly s3Instance = new S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
+    secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
   });
 
   async s3_upload(
@@ -23,7 +27,7 @@ export class S3FileService {
       ContentType: mimetype,
       ContentDisposition: 'inline',
       CreateBucketConfiguration: {
-        LocationConstraint: process.env.AWS_REGION,
+        LocationConstraint: this.configService.get<string>('AWS_REGION'),
       },
     };
 
@@ -43,7 +47,7 @@ export class S3FileService {
 
     return await this.s3_upload(
       file,
-      process.env.AWS_S3_BUCKET_NAME,
+      this.configService.get<string>('AWS_S3_BUCKET_NAME'),
       `${imageName}.${fileExtension}`,
       file.mimetype,
     );
@@ -51,7 +55,7 @@ export class S3FileService {
 
   async deleteFile(file_name: string): Promise<void> {
     const params = {
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Bucket: this.configService.get<string>('AWS_S3_BUCKET_NAME'),
       Key: file_name,
     };
 

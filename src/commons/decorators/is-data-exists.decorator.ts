@@ -3,7 +3,7 @@ import { DatabaseConstraint } from '../constraints/database.constraint'
 import { ModelMappingTable } from '../enums/model-mapping.enum';
 
 @ValidatorConstraint({ async: true })
-export class IsForeignKeyExistsConstraint extends DatabaseConstraint {
+export class IsDataExistsConstraint extends DatabaseConstraint {
     checkRecord(record: any): boolean {
         return !!record;
     }
@@ -13,14 +13,14 @@ export class IsForeignKeyExistsConstraint extends DatabaseConstraint {
     }
 }
 
-export function IsForeignKeyExists(entity: ModelMappingTable, property: string, validationOptions?: ValidationOptions) {
+export function IsDataExists(entity: ModelMappingTable, property: string, validationOptions?: ValidationOptions) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
             target: object.constructor,
             propertyName: propertyName,
             options: validationOptions,
             constraints: [entity, property],
-            validator: IsForeignKeyExistsConstraint,
+            validator: IsDataExistsConstraint,
         });
     };
 }

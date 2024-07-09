@@ -4,12 +4,16 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { CustomRequest } from 'src/commons/interfaces/custom_request'
 import { SecurityService } from 'src/commons/services/security.service'
 
 @Injectable()
 export class IdentificationGuard implements CanActivate {
-  constructor(private securityService: SecurityService) { }
+  constructor(
+    private securityService: SecurityService,
+    private configService: ConfigService
+  ) { }
 
   async canActivate(context: ExecutionContext) {
     Logger.log('Launching Identification Guard...')
@@ -32,7 +36,10 @@ export class IdentificationGuard implements CanActivate {
     }
 
     // Verify token JWT
-    const resultJwt = await this.securityService.verifyAccessToken(token)
+    const resultJwt = this.securityService.verifyJwt(
+      token,
+      this.configService.get<string>('ACCESS_TOKEN_SECRET')
+    )
 
     Logger.log(resultJwt)
 

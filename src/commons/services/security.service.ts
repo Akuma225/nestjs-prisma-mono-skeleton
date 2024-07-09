@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import * as dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
-
-dotenv.config();
+import { AccessTokenData } from '../shared/entities/access-token-data.entity';
 
 @Injectable()
 export class SecurityService {
@@ -12,35 +10,11 @@ export class SecurityService {
     return jwt.sign(data, secret, { expiresIn });
   }
 
-  verifyJwt(token: string, secret: string) {
+  verifyJwt(token: string, secret: string): AccessTokenData {
     try {
-      return jwt.verify(token, secret);
+      return new AccessTokenData(jwt.verify(token, secret));
     } catch (error) {
       return null;
     }
-  }
-
-  async generateAccessToken(data) {
-    return this.signJwt(
-      data,
-      process.env.JWT_SECRET,
-      process.env.ACCESS_TOKEN_EXPIRE,
-    );
-  }
-
-  async generateRefreshToken(data) {
-    return this.signJwt(
-      data,
-      process.env.REFRESH_TOKEN_SECRET,
-      process.env.REFRESH_TOKEN_EXPIRE,
-    );
-  }
-
-  async verifyAccessToken(token: string) {
-    return this.verifyJwt(token, process.env.JWT_SECRET);
-  }
-
-  async verifyRefreshToken(token: string) {
-    return this.verifyJwt(token, process.env.REFRESH_TOKEN_SECRET);
   }
 }
