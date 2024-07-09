@@ -152,6 +152,12 @@ export class PaginationService {
     return orderBy
   }
 
+  /**
+   * Creates a nested search object based on the given path and value.
+   * @param path - An array of strings representing the path to the nested property.
+   * @param value - The value to search for.
+   * @returns The nested search object.
+   */
   createNestedSearchObject(path: string[], value: string): any {
     if (path.length === 1) {
       return {
@@ -167,6 +173,16 @@ export class PaginationService {
     };
   }
 
+  /**
+   * Merges two OR where clauses into a single OR where clause.
+   * If the initial where clause is empty or the another where clause is empty, the initial where clause is returned.
+   * If the initial where clause does not have an OR property, the another where clause is added as the OR property.
+   * If the initial where clause already has an OR property, the another where clause is appended to the existing OR property.
+   * 
+   * @param initialWhere - The initial where clause.
+   * @param anotherWhere - The another where clause to merge.
+   * @returns The merged OR where clause.
+   */
   mergeORWhereClauses(initialWhere: any, anotherWhere: any): any {
     if (!initialWhere || Object.keys(anotherWhere).length === 0) {
       return initialWhere;
@@ -185,6 +201,13 @@ export class PaginationService {
     };
   }
 
+  /**
+   * Generates a search query based on the provided search term, searchables, and current where clause.
+   * @param search - The search term to look for.
+   * @param searchables - An array of strings representing the fields to search in.
+   * @param currentWhere - The current where clause to merge the search conditions with.
+   * @returns The merged where clause with the search conditions.
+   */
   generateSearchQuery(search: string, searchables: string[], currentWhere: any): any {
     Logger.log(`Searching for ${search} in ${searchables.join(', ')}`);
     const searchConditions = searchables.map((searchable) => {
