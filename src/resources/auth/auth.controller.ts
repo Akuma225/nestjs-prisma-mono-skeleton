@@ -10,7 +10,9 @@ import { RequestResetPasswordDTO } from './dtos/request-reset-password.dto';
 import { ConfirmResetPasswordDTO } from './dtos/confirm-reset-password.dto';
 import { ResetPasswordDTO } from './dtos/reset-password.dto';
 import { ResendResetPasswordOtpDTO } from './dtos/resend-reset-password-otp.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }

@@ -17,6 +17,7 @@ import { PaginationService } from './commons/services/pagination.service';
 import { PaginationServiceProvider } from './commons/providers/paginationservice.provider';
 import { RedisService } from './commons/services/redis.service';
 import { RedisServiceProvider } from './commons/providers/redisservice.provider';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Global() // Marque le module comme global
 @Module({
@@ -24,6 +25,10 @@ import { RedisServiceProvider } from './commons/providers/redisservice.provider'
     ConfigModule.forRoot({
       isGlobal: true, // Assurez-vous que le ConfigModule est global
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 10,
+    }]),
 
     // Modules de ressources
     AuthModule,
@@ -38,6 +43,11 @@ import { RedisServiceProvider } from './commons/providers/redisservice.provider'
     {
       provide: APP_GUARD,
       useClass: IdentificationGuard,
+    },
+
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
     },
     PrismaService,
     PrismaServiceProvider,
