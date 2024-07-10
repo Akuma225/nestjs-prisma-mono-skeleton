@@ -56,10 +56,15 @@ export class BaseCRUDService<T> {
    * @returns A Promise that resolves to the created record.
    * @throws HttpException if there is an error creating the record.
    */
-  async genericCreate(data: any): Promise<T> {
+  async genericCreate(data: any, connectedUserId?: string): Promise<T> {
     try {
       this.model = this.initModel()
-      return await this.model.create({ data });
+      return await this.model.create({
+        data: {
+          ...data,
+          created_by: connectedUserId,
+        },
+      });
     } catch (error) {
       Logger.error(error);
       throw new HttpException('Error creating record', HttpStatus.BAD_REQUEST);
@@ -127,13 +132,16 @@ export class BaseCRUDService<T> {
    * @returns A promise that resolves to the updated record.
    * @throws {HttpException} If there is an error updating the record.
    */
-  async genericUpdate(id: string, data: Partial<any>): Promise<T> {
+  async genericUpdate(id: string, data: Partial<any>, connectedUserId?: string): Promise<T> {
     try {
       this.model = this.initModel()
 
       return await this.model.update({
         where: { id },
-        data,
+        data: {
+          ...data,
+          updated_by: connectedUserId,
+        }
       });
     } catch (error) {
       Logger.error(error);
@@ -167,13 +175,13 @@ export class BaseCRUDService<T> {
    * @returns A promise that resolves to the updated record after soft deletion.
    * @throws HttpException if an error occurs during soft deletion.
    */
-  async genericSoftDelete(id: string): Promise<T> {
+  async genericSoftDelete(id: string, connectedUserId?: string): Promise<T> {
     try {
       this.model = this.initModel()
 
       return await this.model.update({
         where: { id },
-        data: { deleted_at: new Date() },
+        data: { deleted_at: new Date(), deleted_by: connectedUserId },
       });
     } catch (error) {
       Logger.error(error);
@@ -187,13 +195,13 @@ export class BaseCRUDService<T> {
    * @returns A promise that resolves to the restored record.
    * @throws {HttpException} If there is an error restoring the record.
    */
-  async genericRestore(id: string): Promise<T> {
+  async genericRestore(id: string, connectedUserId?: string): Promise<T> {
     try {
       this.model = this.initModel()
 
       return await this.model.update({
         where: { id },
-        data: { deleted_at: null },
+        data: { deleted_at: null, deleted_by: null, updated_by: connectedUserId },
       });
     } catch (error) {
       Logger.error(error);

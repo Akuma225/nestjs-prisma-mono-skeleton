@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsString } from "class-validator";
 import { IsUnique } from "src/commons/decorators/is-unique.decorator";
 import { ModelMappingTable } from "src/commons/enums/model-mapping.enum";
 
@@ -24,12 +24,4 @@ export class CreateCategoryDto {
         example: 'Category 1 description'
     })
     description: string;
-
-    @IsString()
-    @IsOptional()
-    @ApiProperty({
-        description: 'Category created by',
-        example: 'admin'
-    })
-    created_by?: string;
 }
