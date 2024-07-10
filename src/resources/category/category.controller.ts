@@ -7,6 +7,7 @@ import { CategoryVm } from 'src/commons/shared/viewmodels/category.vm';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { CustomRequest } from 'src/commons/interfaces/custom_request';
 import { ParamId } from 'src/commons/decorators/param-id.decorator';
+import { Cacheable } from 'src/commons/decorators/cacheable.decorator';
 
 @Controller('categories')
 export class CategoryController {
@@ -19,6 +20,7 @@ export class CategoryController {
 
   @Get()
   @Pagination()
+  @Cacheable()
   async findAll(
     @Req() req: CustomRequest,
   ) {
