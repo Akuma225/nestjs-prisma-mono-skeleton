@@ -55,6 +55,8 @@ export class CategoryController {
   }
 
   @Patch(':id')
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @ApiResponse({ status: 200, type: CategoryVm })
   async update(
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" })
@@ -66,6 +68,8 @@ export class CategoryController {
   }
 
   @Delete(':id')
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @ApiResponse({ status: 204, description: "La catégorie a été définitivement supprimée !" })
   async remove(
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string
@@ -77,6 +81,8 @@ export class CategoryController {
   }
 
   @Delete(':id/soft')
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @ApiResponse({ status: 200, type: CategoryVm })
   async softDelete(
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string,
@@ -86,6 +92,8 @@ export class CategoryController {
   }
 
   @Patch(':id/restore')
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @ApiResponse({ status: 200, type: CategoryVm })
   async restore(
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string,
