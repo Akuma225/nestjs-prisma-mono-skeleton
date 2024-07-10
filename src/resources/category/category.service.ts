@@ -15,13 +15,13 @@ export class CategoryService extends BaseCRUDService<Category> {
     super(modelName);
   }
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto, connectedUserId?: string) {
     const slug = this.slugService.slugify(createCategoryDto.name);
 
     return this.genericCreate({
       ...createCategoryDto,
-      slug,
-    });
+      slug
+    }, connectedUserId);
   }
 
   findAll(params?: IPaginationParams | undefined) {
@@ -32,19 +32,21 @@ export class CategoryService extends BaseCRUDService<Category> {
     return this.genericFindOne(id);
   }
 
-  update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    return this.genericUpdate(id, updateCategoryDto);
+  update(id: string, updateCategoryDto: UpdateCategoryDto, connectedUserId?: string) {
+    return this.genericUpdate(id, {
+      ...updateCategoryDto
+    }, connectedUserId);
   }
 
   remove(id: string) {
     return this.genericDelete(id);
   }
 
-  softDelete(id: string) {
-    return this.genericSoftDelete(id);
+  softDelete(id: string, connectedUserId?: string) {
+    return this.genericSoftDelete(id, connectedUserId);
   }
 
-  restore(id: string) {
-    return this.genericRestore(id);
+  restore(id: string, connectedUserId?: string) {
+    return this.genericRestore(id, connectedUserId);
   }
 }

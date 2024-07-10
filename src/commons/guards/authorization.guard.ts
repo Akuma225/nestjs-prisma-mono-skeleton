@@ -7,14 +7,15 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { Profile } from '../enums/profile.enum'
+import { UserData } from '../shared/entities/user-data.entity'
 
 @Injectable()
-export class AdminRoleGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+export class AuthorizationGuard implements CanActivate {
+  constructor(private reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
     let profiles = this.reflector.getAllAndOverride<Array<Profile>>(
-      'admin_profiles',
+      'profiles',
       [context.getHandler(), context.getClass()]
     )
 
@@ -27,23 +28,17 @@ export class AdminRoleGuard implements CanActivate {
     Logger.log(`Checking for profiles: ${profiles.join(', ')}`)
 
     const request = context.switchToHttp().getRequest()
-    const user = request.user
+    const user: UserData = request.user
 
     if (!user) {
       throw new HttpException('Accès non autorisé.', 401)
     }
 
-    if (!user.admins || user.admins.length === 0) {
-      throw new HttpException("Vous n'avez pas accès à cette ressource !", 403)
-    }
-
-    const admin = user.admins[0]
-
-    if (admin.profile === Profile.SUPER_ADMIN) {
+    if (user.profile === Profile.SUPER_ADMIN) {
       return true
     }
 
-    if (!profiles.includes(admin.profile)) {
+    if (!profiles.includes(user.profile)) {
       throw new HttpException("Vous n'avez pas accès à cette ressource !", 403)
     }
 
