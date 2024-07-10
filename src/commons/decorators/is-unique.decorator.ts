@@ -14,7 +14,7 @@ export class IsUniqueConstraint extends DatabaseConstraint {
     }
 }
 
-export function IsUnique(entity: ModelMappingTable, property: string, mode: IsUniqueMode = IsUniqueMode.DEFAULT, validationOptions?: ValidationOptions) {
+export function IsUnique(entity: ModelMappingTable, property: string, validationOptions?: ValidationOptions, mode: IsUniqueMode = IsUniqueMode.INSENSITIVE) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
             target: object.constructor,

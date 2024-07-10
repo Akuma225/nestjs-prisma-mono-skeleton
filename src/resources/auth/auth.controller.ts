@@ -6,6 +6,10 @@ import { ActivateAccountDTO } from './dtos/activate-account.dto';
 import { ResetActivationOtpDTO } from './dtos/resend-activation-otp.dto';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
 import { CustomRequest } from 'src/commons/interfaces/custom_request';
+import { RequestResetPasswordDTO } from './dtos/request-reset-password.dto';
+import { ConfirmResetPasswordDTO } from './dtos/confirm-reset-password.dto';
+import { ResetPasswordDTO } from './dtos/reset-password.dto';
+import { ResendResetPasswordOtpDTO } from './dtos/resend-reset-password-otp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -43,5 +47,29 @@ export class AuthController {
   async logout(@Req() req: CustomRequest) {
     await this.authService.revokeToken(req.user.id);
     throw new HttpException("Utilisateur déconnecté avec succès !", HttpStatus.NO_CONTENT);
+  }
+
+  @Post('password-reset')
+  async requestResetPassword(@Body() data: RequestResetPasswordDTO) {
+    return await this.authService.requestResetPassword(data);
+  }
+
+  @Post('password-reset/resend')
+  async resendResetPasswordOtp(@Body() data: ResendResetPasswordOtpDTO) {
+    return await this.authService.resendResetPasswordOtp(data);
+  }
+
+  @Post('password-reset/confirm')
+  async confirmResetPassword(@Body() data: ConfirmResetPasswordDTO) {
+    return await this.authService.confirmResetPassword(data);
+  }
+
+  @Post('password-reset/reset')
+  async resetPassword(@Body() data: ResetPasswordDTO) {
+    await this.authService.resetPassword(data);
+
+    return {
+      message: 'Mot de passe réinitialisé avec succès !'
+    }
   }
 }
