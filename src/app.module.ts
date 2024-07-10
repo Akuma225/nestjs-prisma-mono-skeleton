@@ -15,6 +15,8 @@ import { CategoryModule } from './resources/category/category.module';
 import { PrismaServiceProvider } from './commons/providers/prismaservice.provider';
 import { PaginationService } from './commons/services/pagination.service';
 import { PaginationServiceProvider } from './commons/providers/paginationservice.provider';
+import { RedisService } from './commons/services/redis.service';
+import { RedisServiceProvider } from './commons/providers/redisservice.provider';
 
 @Global() // Marque le module comme global
 @Module({
@@ -44,9 +46,11 @@ import { PaginationServiceProvider } from './commons/providers/paginationservice
     PaginationService,
     PaginationServiceProvider,
     SecurityService,
-    BootstrapService
+    BootstrapService,
+    RedisService,
+    RedisServiceProvider
   ],
-  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, SecurityService], // Exporte les services globaux
+  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, RedisService, RedisServiceProvider, SecurityService], // Exporte les services globaux
 })
 export class AppModule implements OnModuleInit {
 
@@ -54,6 +58,7 @@ export class AppModule implements OnModuleInit {
     private readonly viewmodelService: ViewmodelService,
     private readonly prismaService: PrismaService,
     private readonly paginationService: PaginationService,
+    private readonly redisService: RedisService,
   ) { }
 
   configure(consumer: MiddlewareConsumer) {
@@ -66,5 +71,6 @@ export class AppModule implements OnModuleInit {
     ViewmodelServiceProvider.setViewmodelService(this.viewmodelService);
     PrismaServiceProvider.setPrismaService(this.prismaService);
     PaginationServiceProvider.setPaginationService(this.paginationService);
+    RedisServiceProvider.setRedisService(this.redisService);
   }
 }
