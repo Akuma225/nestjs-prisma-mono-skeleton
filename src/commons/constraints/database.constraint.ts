@@ -7,10 +7,13 @@ const prisma: any = new PrismaClient();
 export abstract class DatabaseConstraint implements ValidatorConstraintInterface {
     async validate(value: any, args: ValidationArguments): Promise<boolean> {
         const [entity, property, mode] = args.constraints;
-        const record = await prisma[entity].findUnique({
+        const record = await prisma[entity].findFirst({
             where: {
                 //[property]: property === 'id' ? value : { equals: value, mode },
-                [property]: value,
+                [property]: {
+                    equals: value,
+                    mode,
+                },
             },
         });
         return this.checkRecord(record);
