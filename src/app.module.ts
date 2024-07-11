@@ -18,6 +18,9 @@ import { PaginationServiceProvider } from './commons/providers/paginationservice
 import { RedisService } from './commons/services/redis.service';
 import { RedisServiceProvider } from './commons/providers/redisservice.provider';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { RequestContextService } from './commons/services/request-context.service';
+import { RequestContextInterceptor } from './commons/interceptors/request-context.interceptor';
+import { IsUniqueConstraint } from './commons/decorators/is-unique.decorator';
 
 @Global() // Marque le module comme global
 @Module({
@@ -41,6 +44,10 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
       useClass: ResponseInterceptor,
     },
     {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestContextInterceptor,
+    },
+    {
       provide: APP_GUARD,
       useClass: IdentificationGuard,
     },
@@ -58,9 +65,11 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     SecurityService,
     BootstrapService,
     RedisService,
-    RedisServiceProvider
+    RedisServiceProvider,
+    RequestContextService,
+    IsUniqueConstraint,
   ],
-  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, RedisService, RedisServiceProvider, SecurityService], // Exporte les services globaux
+  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, RedisService, RedisServiceProvider, SecurityService, RequestContextService, IsUniqueConstraint], // Exporte les services globaux
 })
 export class AppModule implements OnModuleInit {
 
