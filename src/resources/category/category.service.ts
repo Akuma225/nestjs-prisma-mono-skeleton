@@ -33,8 +33,11 @@ export class CategoryService extends BaseCRUDService<Category> {
   }
 
   update(id: string, updateCategoryDto: UpdateCategoryDto, connectedUserId?: string) {
+    const slug = this.slugService.slugify(updateCategoryDto.name);
+
     return this.genericUpdate(id, {
-      ...updateCategoryDto
+      ...updateCategoryDto,
+      slug
     }, connectedUserId);
   }
 

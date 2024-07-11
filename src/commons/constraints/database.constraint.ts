@@ -12,7 +12,7 @@ export abstract class DatabaseConstraint implements ValidatorConstraintInterface
     constructor(protected requestContextService: RequestContextService) { }
 
     async validate(value: any, args: ValidationArguments): Promise<boolean> {
-        const [entity, property, mode, paramKeys] = args.constraints;
+        const [entity, property, mode] = args.constraints;
         const request: CustomRequest = this.requestContextService.getContext();
 
         const params = request.params;
@@ -23,11 +23,14 @@ export abstract class DatabaseConstraint implements ValidatorConstraintInterface
             },
         };
 
-        if (paramKeys) {
-            where.NOT = {}
+        const updateMethods = ["PATCH", "PUT"];
 
-            for (const key of paramKeys) {
-                where.NOT[key] = params[key];
+        if (updateMethods.includes(request.method) && request.params.id) {
+            where = {
+                ...where,
+                id: {
+                    not: request.params.id,
+                },
             }
         }
 
