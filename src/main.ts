@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 import { LifecycleService } from './commons/lifecycles/LifecycleService';
 import { PrismaClientExceptionFilter } from './commons/filters/prisma-client-exception/prisma-client-exception.filter';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -29,6 +30,8 @@ async function bootstrap() {
     credentials: true,
   });
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useStaticAssets(join(__dirname, '..', 'assets'), {
