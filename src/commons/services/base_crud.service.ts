@@ -56,15 +56,30 @@ export class BaseCRUDService<T> {
    * @returns A Promise that resolves to the created record.
    * @throws HttpException if there is an error creating the record.
    */
-  async genericCreate(data: any, connectedUserId?: string): Promise<T> {
+  async genericCreate(data: any, connectedUserId?: string, transaction: boolean = true): Promise<T> {
+    if (!transaction) {
+      try {
+        this.model = this.initModel()
+        return await this.model.create({
+          data: {
+            ...data,
+            created_by: connectedUserId,
+          },
+        });
+      } catch (error) {
+        Logger.error(error);
+        throw new HttpException('Error creating record', HttpStatus.BAD_REQUEST);
+      }
+    }
+
     try {
-      this.model = this.initModel()
-      return await this.model.create({
-        data: {
-          ...data,
-          created_by: connectedUserId,
-        },
+      const prisma = BaseCRUDService.getPrismaService();
+      const createdData = await prisma.create(this.modelName, {
+        ...data,
+        created_by: connectedUserId,
       });
+
+      return createdData;
     } catch (error) {
       Logger.error(error);
       throw new HttpException('Error creating record', HttpStatus.BAD_REQUEST);
@@ -132,17 +147,32 @@ export class BaseCRUDService<T> {
    * @returns A promise that resolves to the updated record.
    * @throws {HttpException} If there is an error updating the record.
    */
-  async genericUpdate(id: string, data: Partial<any>, connectedUserId?: string): Promise<T> {
-    try {
-      this.model = this.initModel()
+  async genericUpdate(id: string, data: Partial<any>, connectedUserId?: string, transaction: boolean = true): Promise<T> {
+    if (!transaction) {
+      try {
+        this.model = this.initModel()
 
-      return await this.model.update({
-        where: { id },
-        data: {
-          ...data,
-          updated_by: connectedUserId,
-        }
+        return await this.model.update({
+          where: { id },
+          data: {
+            ...data,
+            updated_by: connectedUserId,
+          }
+        });
+      } catch (error) {
+        Logger.error(error);
+        throw new HttpException('Error updating record', HttpStatus.BAD_REQUEST);
+      }
+    }
+
+    try {
+      const prisma = BaseCRUDService.getPrismaService();
+      const updatedData = await prisma.update(this.modelName, { id }, {
+        ...data,
+        updated_by: connectedUserId,
       });
+
+      return updatedData;
     } catch (error) {
       Logger.error(error);
       throw new HttpException('Error updating record', HttpStatus.BAD_REQUEST);
