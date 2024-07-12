@@ -1,15 +1,11 @@
-import { HttpException, Injectable } from '@nestjs/common'
-import { PrismaService } from './prisma.service'
-import { AuditProperties } from '../enums/audit_properties.enum'
-import { UserMinVm } from '../shared/viewmodels/user.vm'
+import { HttpException, Injectable } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+import { AuditProperties } from '../enums/audit_properties.enum';
+import { UserMinVm } from '../shared/viewmodels/user.vm';
 
 @Injectable()
 export class ViewmodelService {
-  constructor(private readonly prismaService: PrismaService) {}
-
-  /*
-   * Default ViewModel Methods: createViewModel, createArrayViewModel, createPaginatedViewModel
-   */
+  constructor(private readonly prismaService: PrismaService) { }
 
   /**
    * Creates a view model instance based on the provided data and view model class.
@@ -31,27 +27,26 @@ export class ViewmodelService {
     ]
   ): Promise<T> {
     if (!data) {
-      throw new HttpException('Donnée introuvable', 404)
+      throw new HttpException('Donnée introuvable', 404);
     }
 
     const additionalProperties = await this.processAuditFields(
       data,
       extended_audit,
       properties
-    )
-    return new viewModel({ ...data, ...additionalProperties })
+    );
+    return new viewModel({ ...data, ...additionalProperties });
   }
 
   /**
    * Creates an array of view models from an array of data objects.
-   *
    * @template T - The type of the view model.
-   * @param {any[]} dataArray - The array of data objects.
-   * @param {new (data: any) => T} viewModel - The constructor function for the view model.
-   * @param {boolean} [extended_audit] - Optional flag to enable extended audit.
-   * @param {AuditProperties[]} [properties] - Optional array of audit properties.
-   * @returns {Promise<T[]>} - A promise that resolves to an array of view models.
-   * @throws {HttpException} - If the dataArray is not an array.
+   * @param dataArray - The array of data objects.
+   * @param viewModel - The constructor function for the view model.
+   * @param extended_audit - Optional flag to enable extended audit.
+   * @param properties - Optional array of audit properties.
+   * @returns A promise that resolves to an array of view models.
+   * @throws HttpException if the dataArray is not an array.
    */
   async createArrayViewModel<T>(
     dataArray: any[],
@@ -64,14 +59,14 @@ export class ViewmodelService {
     ]
   ): Promise<T[]> {
     if (!Array.isArray(dataArray)) {
-      throw new HttpException('Données introuvables', 404)
+      throw new HttpException('Données introuvables', 404);
     }
 
     const viewModelPromises = dataArray.map(async (data) => {
-      return this.createViewModel(data, viewModel, extended_audit, properties)
-    })
+      return this.createViewModel(data, viewModel, extended_audit, properties);
+    });
 
-    return Promise.all(viewModelPromises)
+    return Promise.all(viewModelPromises);
   }
 
   /**
@@ -90,7 +85,7 @@ export class ViewmodelService {
     properties: AuditProperties[] = []
   ): Promise<{ result: T[]; total: number }> {
     if (!data) {
-      throw new HttpException('Données introuvables', 404)
+      throw new HttpException('Données introuvables', 404);
     }
 
     const formattedResult = await this.createArrayViewModel(
@@ -98,12 +93,12 @@ export class ViewmodelService {
       viewModel,
       extended_audit,
       properties
-    )
+    );
 
     return {
       ...data,
       result: formattedResult,
-    }
+    };
   }
 
   /**
@@ -111,12 +106,12 @@ export class ViewmodelService {
    * @param userId - The ID of the user to retrieve.
    * @returns A Promise that resolves to the user object, or null if not found.
    */
-  async getUserById(userId) {
+  async getUserById(userId): Promise<any> {
     return this.prismaService.users.findUnique({
       where: {
         id: userId,
       },
-    })
+    });
   }
 
   /**
@@ -125,19 +120,18 @@ export class ViewmodelService {
    * If the value is 'false', it returns `false`.
    * If the value can be parsed as a number, it returns the parsed number.
    * Otherwise, it returns the original value.
-   *
    * @param value - The string value to parse.
    * @returns The parsed value as a string, number, or boolean.
    */
   parseValue(value: string): string | number | boolean {
     if (value === 'true') {
-      return true
+      return true;
     } else if (value === 'false') {
-      return false
+      return false;
     } else if (!isNaN(Number(value))) {
-      return Number(value)
+      return Number(value);
     }
-    return value
+    return value;
   }
 
   /**
@@ -154,30 +148,30 @@ export class ViewmodelService {
   ): Promise<any> {
     if (extended_audit !== undefined) {
       if (!extended_audit) {
-        properties = []
-        data.created_by = null
-        data.updated_by = null
-        data.deleted_by = null
+        properties = [];
+        data.created_by = null;
+        data.updated_by = null;
+        data.deleted_by = null;
       } else if (properties.length === 0) {
         properties = [
           AuditProperties.CREATED_BY,
           AuditProperties.UPDATED_BY,
           AuditProperties.DELETED_BY,
-        ]
+        ];
       }
     }
 
     const propertyPromises = properties.map(async (prop) => {
-      const userId = data[prop]
+      const userId = data[prop];
 
       if (userId) {
-        const user = await this.getUserById(userId)
-        return user ? { [prop]: new UserMinVm(user) } : { [prop]: null }
+        const user = await this.getUserById(userId);
+        return user ? { [prop]: new UserMinVm(user) } : { [prop]: null };
       }
-      return { [prop]: null }
-    })
+      return { [prop]: null };
+    });
 
-    const resolvedProperties = await Promise.all(propertyPromises)
-    return resolvedProperties.reduce((acc, prop) => ({ ...acc, ...prop }), {})
+    const resolvedProperties = await Promise.all(propertyPromises);
+    return resolvedProperties.reduce((acc, prop) => ({ ...acc, ...prop }), {});
   }
 }

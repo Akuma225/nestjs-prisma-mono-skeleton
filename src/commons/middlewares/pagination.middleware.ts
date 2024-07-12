@@ -2,6 +2,12 @@ import { Injectable, NestMiddleware } from '@nestjs/common'
 import { Response, NextFunction } from 'express'
 import { CustomRequest } from '../interfaces/custom_request'
 
+/**
+  * Middleware to handle pagination parameters in GET requests.
+  * @param req - The custom request object.
+  * @param _res - The response object (not used in this middleware).
+  * @param next - The next function to call in the middleware chain.
+  */
 @Injectable()
 export class PaginationMiddleware implements NestMiddleware {
   use(req: CustomRequest, _res: Response, next: NextFunction) {

@@ -2,6 +2,14 @@ import { createParamDecorator, ExecutionContext, HttpException, HttpStatus, NotF
 import { ModelMappingTable } from '../enums/model-mapping.enum';
 import { PrismaService } from '../services/prisma.service';
 
+/**
+ * Custom decorator to retrieve and validate a parameter ID.
+ * @param data - An object containing the decorator options.
+ * @param ctx - The execution context.
+ * @returns The validated parameter ID.
+ * @throws Error if the specified model is not found in the Prisma schema.
+ * @throws HttpException if the record with the specified ID is not found.
+ */
 export const ParamId = createParamDecorator(
     async (
         data: { key?: string, model: ModelMappingTable, property?: string, errorMessage?: string },

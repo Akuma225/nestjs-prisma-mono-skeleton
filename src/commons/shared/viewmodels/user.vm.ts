@@ -19,7 +19,7 @@ export class UserVm {
   contact: string
 
   @ApiResponseProperty()
-  profile: any
+  profile: EnumVm<Profile, ProfileVm>
 
   constructor(data) {
     this.id = data.id

@@ -13,6 +13,13 @@ export class IsDataExistsConstraint extends DatabaseConstraint {
     }
 }
 
+/**
+ * Decorator that checks if data exists in a specific entity and property.
+ * @param entity - The entity to check for data existence.
+ * @param property - The property within the entity to check for data existence.
+ * @param validationOptions - Optional validation options.
+ * @returns A decorator function.
+ */
 export function IsDataExists(entity: ModelMappingTable, property: string, validationOptions?: ValidationOptions) {
     return function (object: Object, propertyName: string) {
         registerDecorator({

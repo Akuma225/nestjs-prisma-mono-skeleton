@@ -6,16 +6,29 @@ import { CustomRequest } from '../interfaces/custom_request';
 
 const prisma: any = new PrismaClient();
 
+/**
+ * Abstract class representing a database constraint.
+ * This class provides a base implementation for validating values against a database.
+ */
 @ValidatorConstraint({ async: true })
 @Injectable({ scope: Scope.DEFAULT })
 export abstract class DatabaseConstraint implements ValidatorConstraintInterface {
+    /**
+     * Creates an instance of DatabaseConstraint.
+     * @param requestContextService - The request context service.
+     */
     constructor(protected requestContextService: RequestContextService) { }
 
+    /**
+     * Validates the given value against the database.
+     * @param value - The value to be validated.
+     * @param args - The validation arguments.
+     * @returns A promise that resolves to a boolean indicating whether the value is valid.
+     */
     async validate(value: any, args: ValidationArguments): Promise<boolean> {
-        const [entity, property, mode, paramKeys] = args.constraints;
+        const [entity, property, mode] = args.constraints;
         const request: CustomRequest = this.requestContextService.getContext();
 
-        const params = request.params;
         let where: any = {
             [property]: {
                 equals: value,
@@ -23,11 +36,14 @@ export abstract class DatabaseConstraint implements ValidatorConstraintInterface
             },
         };
 
-        if (paramKeys) {
-            where.NOT = {}
+        const updateMethods = ["PATCH", "PUT"];
 
-            for (const key of paramKeys) {
-                where.NOT[key] = params[key];
+        if (property !== 'id' && updateMethods.includes(request.method) && request.params.id) {
+            where = {
+                ...where,
+                id: {
+                    not: request.params.id,
+                },
             }
         }
 
@@ -39,6 +55,19 @@ export abstract class DatabaseConstraint implements ValidatorConstraintInterface
         return this.checkRecord(record);
     }
 
+    /**
+     * Checks if the given record is valid.
+     * This method should be implemented by subclasses.
+     * @param record - The record to be checked.
+     * @returns A boolean indicating whether the record is valid.
+     */
     abstract checkRecord(record: any): boolean;
+
+    /**
+     * Gets the default error message for the constraint.
+     * This method should be implemented by subclasses.
+     * @param args - The validation arguments.
+     * @returns The default error message.
+     */
     abstract defaultMessage(args: ValidationArguments): string;
 }

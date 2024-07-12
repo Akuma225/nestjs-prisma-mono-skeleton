@@ -2,6 +2,12 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { Observable } from 'rxjs';
 import { RequestContextService } from '../services/request-context.service';
 
+/**
+    * Intercepts incoming requests and sets the request context using the RequestContextService.
+    * @param context - The execution context of the request.
+    * @param next - The next handler in the chain.
+    * @returns An observable representing the result of the next handler.
+    */
 @Injectable()
 export class RequestContextInterceptor implements NestInterceptor {
     constructor(private requestContextService: RequestContextService) { }

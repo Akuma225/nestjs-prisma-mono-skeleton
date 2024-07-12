@@ -14,6 +14,7 @@ import { AuthorizationGuard } from 'src/commons/guards/authorization.guard';
 import { SetProfile } from 'src/commons/decorators/set-profile.decorator';
 import { Profile } from 'src/commons/enums/profile.enum';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
+import { Transaction } from 'src/commons/decorators/transaction.decorator';
 
 @ApiTags('Category')
 @ApiBearerAuth()

@@ -9,6 +9,7 @@ import { CustomRequest } from 'src/commons/interfaces/custom_request'
 import { SecurityService } from 'src/commons/services/security.service'
 import { PrismaService } from '../services/prisma.service'
 import { UserData } from '../shared/entities/user-data.entity'
+import { Profile } from '../enums/profile.enum'
 
 @Injectable()
 export class IdentificationGuard implements CanActivate {
@@ -92,7 +93,9 @@ export class IdentificationGuard implements CanActivate {
     // Ajouter les données de l'utilisateur à la requête
 
     request.user = userData
-    request.extended_audit = true
+
+    // Activate extended audit
+    request.extended_audit = [Profile.ADMIN, Profile.SUPER_ADMIN].includes(userData.profile)
 
     return true
   }
