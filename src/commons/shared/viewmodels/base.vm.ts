@@ -4,9 +4,13 @@ import { ViewmodelServiceProvider } from 'src/commons/providers/viewmodel-servic
 import { AuditProperties } from 'src/commons/enums/audit_properties.enum';
 import { HttpException } from '@nestjs/common';
 import { PaginationVm } from './pagination.vm';
+import { RequestContextService } from 'src/commons/services/request-context.service';
+import { RequestContextServiceProvider } from 'src/commons/providers/request-context-service.provider';
+import { CustomRequest } from 'src/commons/interfaces/custom_request';
 
 export class BaseVm extends AuditVm {
   private static viewmodelService: ViewmodelService;
+  private static requestContextService: RequestContextService;
   private static defaultAuditProperties: AuditProperties[] = [
     AuditProperties.CREATED_BY,
     AuditProperties.UPDATED_BY,
@@ -22,11 +26,29 @@ export class BaseVm extends AuditVm {
    * If the instance does not exist, creates and returns it.
    * @returns The instance of ViewmodelService.
    */
-  private static getService(): ViewmodelService {
+  private static getVmService(): ViewmodelService {
     if (!BaseVm.viewmodelService) {
       BaseVm.viewmodelService = ViewmodelServiceProvider.getService();
     }
     return BaseVm.viewmodelService;
+  }
+
+  /**
+   * Returns the RequestContextService instance.
+   * If the instance does not exist, it will be created using the RequestContextServiceProvider.
+   * @returns The RequestContextService instance.
+   */
+  private static getRequestCtxService(): RequestContextService {
+    if (!BaseVm.requestContextService) {
+      BaseVm.requestContextService = RequestContextServiceProvider.getService();
+    }
+    return BaseVm.requestContextService;
+  }
+
+  private static getExtendedAudit(): boolean {
+    const request: CustomRequest = BaseVm.getRequestCtxService().getContext();
+
+    return request.extended_audit;
   }
 
   /**
@@ -42,14 +64,15 @@ export class BaseVm extends AuditVm {
   static async create<T extends BaseVm>(
     this: new (data: any) => T,
     data: any,
-    extendedAudit = false,
     properties: AuditProperties[] = BaseVm.defaultAuditProperties
   ): Promise<T> {
+    const extendedAudit = BaseVm.getExtendedAudit();
+
     if (!data) {
       throw new HttpException('Donnée introuvable', 404);
     }
 
-    const viewmodelService = BaseVm.getService();
+    const viewmodelService = BaseVm.getVmService();
     const additionalProperties = await viewmodelService.processAuditFields(
       data,
       extendedAudit,
@@ -71,14 +94,15 @@ export class BaseVm extends AuditVm {
   static async createArray<T extends BaseVm>(
     this: new (data: any) => T,
     dataArray: any[],
-    extendedAudit = false,
     properties: AuditProperties[] = BaseVm.defaultAuditProperties
   ): Promise<T[]> {
+    const extendedAudit = BaseVm.getExtendedAudit();
+
     if (!dataArray || !Array.isArray(dataArray)) {
       throw new HttpException('Données introuvables ou incorrectes', 404);
     }
 
-    const viewmodelService = BaseVm.getService();
+    const viewmodelService = BaseVm.getVmService();
     const promises = dataArray.map(async data => {
       const additionalProperties = await viewmodelService.processAuditFields(
         data,
@@ -104,16 +128,17 @@ export class BaseVm extends AuditVm {
   static async createPaginated<T extends BaseVm>(
     this: new (data: any) => T,
     data: PaginationVm,
-    extendedAudit = false,
     properties: AuditProperties[] = BaseVm.defaultAuditProperties
   ): Promise<PaginationVm> {
+    const extendedAudit = BaseVm.getExtendedAudit();
+
     const { result } = data;
 
     if (!result || !Array.isArray(result)) {
       throw new HttpException('Données introuvables ou incorrectes', 404);
     }
 
-    const viewmodelService = BaseVm.getService();
+    const viewmodelService = BaseVm.getVmService();
     const promises = result.map(async item => {
       const additionalProperties = await viewmodelService.processAuditFields(
         item,
