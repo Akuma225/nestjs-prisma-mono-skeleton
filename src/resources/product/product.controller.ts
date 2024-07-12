@@ -1,14 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { SetProfile } from 'src/commons/decorators/set-profile.decorator';
+import { Profile } from 'src/commons/enums/profile.enum';
+import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
+import { AuthorizationGuard } from 'src/commons/guards/authorization.guard';
+import { ProductVm } from 'src/commons/shared/viewmodels/product.vm';
 
-@Controller('product')
+@ApiTags('Product')
+@ApiBearerAuth()
+@Controller('products')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @ApiResponse({ status: 201, type: ProductVm })
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
+  async create(@Body() createProductDto: CreateProductDto) {
+    console.log(createProductDto);
     return this.productService.create(createProductDto);
   }
 

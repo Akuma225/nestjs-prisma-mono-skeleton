@@ -33,7 +33,7 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useStaticAssets(join(__dirname, '..', 'assets'), {
     prefix: '/assets/',
   });

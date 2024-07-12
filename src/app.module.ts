@@ -22,6 +22,7 @@ import { RequestContextService } from './commons/services/request-context.servic
 import { RequestContextInterceptor } from './commons/interceptors/request-context.interceptor';
 import { IsUniqueConstraint } from './commons/decorators/is-unique.decorator';
 import { RequestContextServiceProvider } from './commons/providers/request-context-service.provider';
+import { IsDataExistsConstraint } from './commons/decorators/is-data-exists.decorator';
 
 @Global() // Marque le module comme global
 @Module({
@@ -70,8 +71,9 @@ import { RequestContextServiceProvider } from './commons/providers/request-conte
     RequestContextService,
     RequestContextServiceProvider,
     IsUniqueConstraint,
+    IsDataExistsConstraint
   ],
-  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, RedisService, RedisServiceProvider, SecurityService, RequestContextService, RequestContextServiceProvider, IsUniqueConstraint], // Exporte les services globaux
+  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, RedisService, RedisServiceProvider, SecurityService, RequestContextService, RequestContextServiceProvider, IsUniqueConstraint, IsDataExistsConstraint], // Exporte les services globaux
 })
 export class AppModule implements OnModuleInit {
 

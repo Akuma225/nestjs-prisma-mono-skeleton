@@ -24,7 +24,7 @@ export abstract class DatabaseConstraint implements ValidatorConstraintInterface
 
         const updateMethods = ["PATCH", "PUT"];
 
-        if (updateMethods.includes(request.method) && request.params.id) {
+        if (property !== 'id' && updateMethods.includes(request.method) && request.params.id) {
             where = {
                 ...where,
                 id: {
