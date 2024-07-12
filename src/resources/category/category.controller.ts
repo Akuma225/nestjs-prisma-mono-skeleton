@@ -25,7 +25,6 @@ export class CategoryController {
   @Post()
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
-  @Transaction()
   @ApiResponse({ status: 201, type: CategoryVm })
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
@@ -59,7 +58,6 @@ export class CategoryController {
   @Patch(':id')
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
-  @Transaction()
   @ApiResponse({ status: 200, type: CategoryVm })
   async update(
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" })

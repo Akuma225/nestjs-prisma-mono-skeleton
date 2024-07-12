@@ -21,6 +21,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { RequestContextService } from './commons/services/request-context.service';
 import { RequestContextInterceptor } from './commons/interceptors/request-context.interceptor';
 import { IsUniqueConstraint } from './commons/decorators/is-unique.decorator';
+import { RequestContextServiceProvider } from './commons/providers/request-context-service.provider';
 
 @Global() // Marque le module comme global
 @Module({
@@ -67,9 +68,10 @@ import { IsUniqueConstraint } from './commons/decorators/is-unique.decorator';
     RedisService,
     RedisServiceProvider,
     RequestContextService,
+    RequestContextServiceProvider,
     IsUniqueConstraint,
   ],
-  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, RedisService, RedisServiceProvider, SecurityService, RequestContextService, IsUniqueConstraint], // Exporte les services globaux
+  exports: [PrismaService, PrismaServiceProvider, ViewmodelServiceProvider, ViewmodelService, PaginationServiceProvider, PaginationService, RedisService, RedisServiceProvider, SecurityService, RequestContextService, RequestContextServiceProvider, IsUniqueConstraint], // Exporte les services globaux
 })
 export class AppModule implements OnModuleInit {
 
@@ -78,6 +80,7 @@ export class AppModule implements OnModuleInit {
     private readonly prismaService: PrismaService,
     private readonly paginationService: PaginationService,
     private readonly redisService: RedisService,
+    private readonly requestContextService: RequestContextService,
   ) { }
 
   configure(consumer: MiddlewareConsumer) {
@@ -91,5 +94,6 @@ export class AppModule implements OnModuleInit {
     PrismaServiceProvider.setPrismaService(this.prismaService);
     PaginationServiceProvider.setPaginationService(this.paginationService);
     RedisServiceProvider.setRedisService(this.redisService);
+    RequestContextServiceProvider.setRequestContextService(this.requestContextService);
   }
 }

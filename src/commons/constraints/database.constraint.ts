@@ -15,7 +15,6 @@ export abstract class DatabaseConstraint implements ValidatorConstraintInterface
         const [entity, property, mode] = args.constraints;
         const request: CustomRequest = this.requestContextService.getContext();
 
-        const params = request.params;
         let where: any = {
             [property]: {
                 equals: value,

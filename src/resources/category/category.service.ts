@@ -21,7 +21,7 @@ export class CategoryService extends BaseCRUDService<Category> {
     return this.genericCreate({
       ...createCategoryDto,
       slug
-    }, connectedUserId, true);
+    }, connectedUserId);
   }
 
   findAll(params?: IPaginationParams | undefined) {
@@ -38,7 +38,7 @@ export class CategoryService extends BaseCRUDService<Category> {
     return this.genericUpdate(id, {
       ...updateCategoryDto,
       slug
-    }, connectedUserId, true);
+    }, connectedUserId);
   }
 
   remove(id: string) {

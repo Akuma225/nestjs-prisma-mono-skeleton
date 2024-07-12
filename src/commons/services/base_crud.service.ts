@@ -6,6 +6,9 @@ import { PaginationVm } from '../shared/viewmodels/pagination.vm';
 import { ModelMappingTable } from '../enums/model-mapping.enum';
 import { PrismaServiceProvider } from '../providers/prismaservice.provider';
 import { PaginationServiceProvider } from '../providers/paginationservice.provider';
+import { RequestContextService } from './request-context.service';
+import { RequestContextServiceProvider } from '../providers/request-context-service.provider';
+import { CustomRequest } from '../interfaces/custom_request';
 
 @Injectable()
 /**
@@ -23,6 +26,7 @@ export class BaseCRUDService<T> {
   // Static properties to hold the Prisma and Pagination services.
   protected static prisma: PrismaService;
   protected static paginationService: PaginationService;
+  protected static requestContextService: RequestContextService;
 
   constructor(
     protected readonly modelNameParam: string
@@ -42,6 +46,13 @@ export class BaseCRUDService<T> {
     return BaseCRUDService.prisma;
   }
 
+  private static getRequestContextService(): RequestContextService {
+    if (!BaseCRUDService.requestContextService) {
+      BaseCRUDService.requestContextService = RequestContextServiceProvider.getRequestContextService();
+    }
+    return BaseCRUDService.requestContextService;
+  }
+
   private static getPaginationService(): PaginationService {
     if (!BaseCRUDService.paginationService) {
       BaseCRUDService.paginationService = PaginationServiceProvider.getPaginationService();
@@ -56,8 +67,11 @@ export class BaseCRUDService<T> {
    * @returns A Promise that resolves to the created record.
    * @throws HttpException if there is an error creating the record.
    */
-  async genericCreate(data: any, connectedUserId?: string, transaction: boolean = true): Promise<T> {
-    if (!transaction) {
+  async genericCreate(data: any, connectedUserId?: string): Promise<T> {
+    const requestContext = BaseCRUDService.getRequestContextService()
+    const request: CustomRequest = requestContext.getContext()
+
+    if (!request.transaction) {
       try {
         this.model = this.initModel()
         return await this.model.create({
@@ -147,8 +161,11 @@ export class BaseCRUDService<T> {
    * @returns A promise that resolves to the updated record.
    * @throws {HttpException} If there is an error updating the record.
    */
-  async genericUpdate(id: string, data: Partial<any>, connectedUserId?: string, transaction: boolean = true): Promise<T> {
-    if (!transaction) {
+  async genericUpdate(id: string, data: Partial<any>, connectedUserId?: string): Promise<T> {
+    const requestContext = BaseCRUDService.getRequestContextService()
+    const request: CustomRequest = requestContext.getContext()
+
+    if (!request.transaction) {
       try {
         this.model = this.initModel()
 

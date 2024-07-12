@@ -7,6 +7,7 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { PrismaService } from '../services/prisma.service';
+import { CustomRequest } from '../interfaces/custom_request';
 
 @Injectable()
 export class TransactionInterceptor implements NestInterceptor {
@@ -14,6 +15,10 @@ export class TransactionInterceptor implements NestInterceptor {
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         this.prisma.startTransaction();
+
+        // Get the request object
+        const request: CustomRequest = context.switchToHttp().getRequest();
+        request.transaction = true
 
         return next.handle().pipe(
             tap(() => {
