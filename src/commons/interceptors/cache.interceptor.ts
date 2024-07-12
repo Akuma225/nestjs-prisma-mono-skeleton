@@ -10,8 +10,11 @@ import { tap } from 'rxjs/operators';
 import { Request } from 'express';
 import { RedisService } from '../services/redis.service';
 import { ConfigService } from '@nestjs/config';
-import { RedisServiceProvider } from '../providers/redisservice.provider';
+import { RedisServiceProvider } from '../providers/redis-service.provider';
 
+/**
+ * Interceptor that provides caching functionality for requests.
+ */
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
 
@@ -21,6 +24,14 @@ export class CacheInterceptor implements NestInterceptor {
         private readonly configService: ConfigService
     ) { }
 
+    /**
+     * Intercepts the incoming request and checks if the response is already cached.
+     * If the response is cached, it returns the cached data.
+     * If the response is not cached, it forwards the request to the next handler and caches the response.
+     * @param context - The execution context.
+     * @param next - The next call handler.
+     * @returns An observable that emits the response data.
+     */
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
         const request = context.switchToHttp().getRequest<Request>();
         const key = this.generateKey(request);
@@ -45,13 +56,23 @@ export class CacheInterceptor implements NestInterceptor {
         );
     }
 
+    /**
+     * Retrieves the Redis service instance.
+     * If the instance does not exist, it creates a new instance and returns it.
+     * @returns The Redis service instance.
+     */
     private static getRedisService(): RedisService {
         if (!CacheInterceptor.redisService) {
-            CacheInterceptor.redisService = RedisServiceProvider.getRedisService();
+            CacheInterceptor.redisService = RedisServiceProvider.getService();
         }
         return CacheInterceptor.redisService;
     }
 
+    /**
+     * Generates a unique cache key based on the request details.
+     * @param request - The incoming request.
+     * @returns The cache key.
+     */
     private generateKey(request: Request): string {
         const { method, originalUrl, body, params, query } = request;
         const key = `${method}-${originalUrl}-${JSON.stringify(body)}-${JSON.stringify(params)}-${JSON.stringify(query)}`;

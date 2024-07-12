@@ -5,11 +5,11 @@ import { RedisService } from '../services/redis.service';
 export class RedisServiceProvider {
   private static service: RedisService;
 
-  static setRedisService(service: RedisService) {
+  static setService(service: RedisService) {
     RedisServiceProvider.service = service;
   }
 
-  static getRedisService(): RedisService {
+  static getService(): RedisService {
     return RedisServiceProvider.service;
   }
 }

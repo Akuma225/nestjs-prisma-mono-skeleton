@@ -5,11 +5,11 @@ import { ViewmodelService } from '../services/viewmodel.service';
 export class ViewmodelServiceProvider {
   private static service: ViewmodelService;
 
-  static setViewmodelService(service: ViewmodelService) {
+  static setService(service: ViewmodelService) {
     ViewmodelServiceProvider.service = service;
   }
 
-  static getViewmodelService(): ViewmodelService {
+  static getService(): ViewmodelService {
     return ViewmodelServiceProvider.service;
   }
 }

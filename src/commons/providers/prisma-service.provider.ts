@@ -5,11 +5,11 @@ import { PrismaService } from '../services/prisma.service';
 export class PrismaServiceProvider {
   private static service: PrismaService;
 
-  static setPrismaService(service: PrismaService) {
+  static setService(service: PrismaService) {
     PrismaServiceProvider.service = service;
   }
 
-  static getPrismaService(): PrismaService {
+  static getService(): PrismaService {
     return PrismaServiceProvider.service;
   }
 }

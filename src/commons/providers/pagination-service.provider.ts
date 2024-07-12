@@ -5,11 +5,11 @@ import { PaginationService } from '../services/pagination.service';
 export class PaginationServiceProvider {
   private static service: PaginationService;
 
-  static setPaginationService(service: PaginationService) {
+  static setService(service: PaginationService) {
     PaginationServiceProvider.service = service;
   }
 
-  static getPaginationService(): PaginationService {
+  static getService(): PaginationService {
     return PaginationServiceProvider.service;
   }
 }

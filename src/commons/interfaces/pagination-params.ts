@@ -1,9 +1,39 @@
+/**
+ * Represents the parameters for pagination.
+ */
 export interface IPaginationParams {
-  page?: number
-  limit?: number
-  all?: boolean
-  search?: string
-  is_deleted_too?: boolean
-  is_deleted_only?: boolean
-  order?: string
+  /**
+   * The page number.
+   */
+  page?: number;
+
+  /**
+   * The maximum number of items per page.
+   */
+  limit?: number;
+
+  /**
+   * Indicates whether to fetch all items without pagination.
+   */
+  all?: boolean;
+
+  /**
+   * The search query string.
+   */
+  search?: string;
+
+  /**
+   * Indicates whether to include items that are marked as deleted.
+   */
+  is_deleted_too?: boolean;
+
+  /**
+   * Indicates whether to include only items that are marked as deleted.
+   */
+  is_deleted_only?: boolean;
+
+  /**
+   * The order in which to sort the items.
+   */
+  order?: string;
 }

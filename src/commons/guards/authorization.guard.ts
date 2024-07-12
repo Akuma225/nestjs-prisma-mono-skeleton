@@ -9,6 +9,13 @@ import { Reflector } from '@nestjs/core'
 import { Profile } from '../enums/profile.enum'
 import { UserData } from '../shared/entities/user-data.entity'
 
+/**
+  * Determines if the user is authorized to access the requested resource.
+  * @param context - The execution context of the request.
+  * @returns A boolean indicating whether the user is authorized.
+  * @throws HttpException with status 401 if the user is not authenticated.
+  * @throws HttpException with status 403 if the user does not have access to the resource.
+  */
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
   constructor(private reflector: Reflector) { }

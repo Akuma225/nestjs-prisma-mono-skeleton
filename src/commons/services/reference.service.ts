@@ -8,10 +8,23 @@ import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class ReferenceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
-  async generate(prefix: ModelMappingPrefix, length: number = 10, referenceField: string = 'reference') {
-    const reference = prefix + '-' + generateRandomString(length);
+  /**
+   * Generates a unique reference string with the given prefix.
+   * 
+   * @param prefix - The prefix to be used for the reference.
+   * @param length - The length of the random string to be appended to the prefix.
+   * @param referenceField - The field name in the database table where the reference is stored.
+   * @returns A promise that resolves to the generated reference string.
+   * @throws {HttpException} If the table corresponding to the prefix is not found.
+   */
+  async generate(
+    prefix: ModelMappingPrefix,
+    length: number = 10,
+    referenceField: string = 'reference'
+  ): Promise<string> {
+    const reference = `${prefix}-${generateRandomString(length)}`;
 
     const table = ModelMappingTable[prefix];
 
@@ -29,7 +42,7 @@ export class ReferenceService {
     });
 
     if (existingReference) {
-      return this.generate(prefix, length);
+      return this.generate(prefix, length, referenceField);
     }
 
     return reference.toUpperCase();

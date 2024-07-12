@@ -14,12 +14,21 @@ export class S3FileService {
     secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
   });
 
+  /**
+   * Uploads a file to S3.
+   *
+   * @param file - The file to be uploaded.
+   * @param bucket - The S3 bucket name.
+   * @param name - The name of the file in S3.
+   * @param mimetype - The MIME type of the file.
+   * @returns A promise that resolves to the S3 upload response, or null if an error occurs.
+   */
   async s3_upload(
     file: Express.Multer.File,
     bucket: string,
     name: string,
     mimetype: string,
-  ) {
+  ): Promise<S3.ManagedUpload.SendData | null> {
     const params = {
       Bucket: bucket,
       Key: String(name),
@@ -39,8 +48,15 @@ export class S3FileService {
     }
   }
 
-  async upload(file: Express.Multer.File, prefix: ModelMappingPrefix) {
-    Logger.log('Uploading following file: ', file);
+  /**
+   * Uploads a file to S3 with a prefix and automatically generated name.
+   *
+   * @param file - The file to be uploaded.
+   * @param prefix - The prefix to be used in the file name.
+   * @returns A promise that resolves to the S3 upload response, or null if an error occurs.
+   */
+  async upload(file: Express.Multer.File, prefix: ModelMappingPrefix): Promise<S3.ManagedUpload.SendData | null> {
+    Logger.log('Uploading the following file: ', file);
 
     const fileExtension = file.mimetype.split('/')[1];
     const imageName = `IMG-${ModelMappingPrefix[prefix]}-${Date.now()}`;
@@ -53,6 +69,12 @@ export class S3FileService {
     );
   }
 
+  /**
+   * Deletes a file from S3.
+   *
+   * @param file_name - The name of the file to be deleted in S3.
+   * @returns A promise that resolves when the file is deleted.
+   */
   async deleteFile(file_name: string): Promise<void> {
     const params = {
       Bucket: this.configService.get<string>('AWS_S3_BUCKET_NAME'),

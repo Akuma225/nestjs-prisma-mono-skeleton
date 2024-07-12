@@ -3,77 +3,73 @@ import { PrismaService } from './prisma.service';
 import { IPaginationParams } from '../interfaces/pagination-params';
 import { PaginationService } from './pagination.service';
 import { PaginationVm } from '../shared/viewmodels/pagination.vm';
-import { ModelMappingTable } from '../enums/model-mapping.enum';
-import { PrismaServiceProvider } from '../providers/prismaservice.provider';
-import { PaginationServiceProvider } from '../providers/paginationservice.provider';
+import { PrismaServiceProvider } from '../providers/prisma-service.provider';
+import { PaginationServiceProvider } from '../providers/pagination-service.provider';
 import { RequestContextService } from './request-context.service';
 import { RequestContextServiceProvider } from '../providers/request-context-service.provider';
 import { CustomRequest } from '../interfaces/custom_request';
 
-@Injectable()
 /**
- * Base CRUD Service for performing common CRUD operations.
- *
- * @template T - The type of the data being manipulated.
+ * Base CRUD Service class for performing CRUD operations on a model.
+ * @template T - The type of the model.
  */
+@Injectable()
 export class BaseCRUDService<T> {
-  protected readonly modelName: string
-
-  // The model to be used for CRUD operations.
+  protected readonly modelName: string;
   protected model: any;
   protected pagination: PaginationService;
 
-  // Static properties to hold the Prisma and Pagination services.
   protected static prisma: PrismaService;
   protected static paginationService: PaginationService;
   protected static requestContextService: RequestContextService;
 
-  constructor(
-    protected readonly modelNameParam: string
-  ) {
-    this.modelName = modelNameParam
+  constructor(protected readonly modelNameParam: string) {
+    this.modelName = modelNameParam;
   }
 
-  initModel() {
-    const prisma = BaseCRUDService.getPrismaService();
-    return prisma[this.modelName]
+  private initModel() {
+    return BaseCRUDService.getPrismaService()[this.modelName];
+  }
+
+  private initServices() {
+    this.pagination = BaseCRUDService.getPaginationService();
+    this.model = this.initModel();
   }
 
   private static getPrismaService(): PrismaService {
     if (!BaseCRUDService.prisma) {
-      BaseCRUDService.prisma = PrismaServiceProvider.getPrismaService();
+      BaseCRUDService.prisma = PrismaServiceProvider.getService();
     }
     return BaseCRUDService.prisma;
   }
 
   private static getRequestContextService(): RequestContextService {
     if (!BaseCRUDService.requestContextService) {
-      BaseCRUDService.requestContextService = RequestContextServiceProvider.getRequestContextService();
+      BaseCRUDService.requestContextService = RequestContextServiceProvider.getService();
     }
     return BaseCRUDService.requestContextService;
   }
 
   private static getPaginationService(): PaginationService {
     if (!BaseCRUDService.paginationService) {
-      BaseCRUDService.paginationService = PaginationServiceProvider.getPaginationService();
+      BaseCRUDService.paginationService = PaginationServiceProvider.getService();
     }
     return BaseCRUDService.paginationService;
   }
 
-  /**
-   * Creates a new record in the database.
-   * 
-   * @param data - The data for the new record.
-   * @returns A Promise that resolves to the created record.
-   * @throws HttpException if there is an error creating the record.
-   */
+  private handleError(error: any, message: string) {
+    Logger.error(error);
+    throw new HttpException(message, HttpStatus.BAD_REQUEST);
+  }
+
   async genericCreate(data: any, connectedUserId?: string): Promise<T> {
-    const requestContext = BaseCRUDService.getRequestContextService()
-    const request: CustomRequest = requestContext.getContext()
+    this.initServices();
+
+    const requestContext = BaseCRUDService.getRequestContextService();
+    const request: CustomRequest = requestContext.getContext();
 
     if (!request.transaction) {
       try {
-        this.model = this.initModel()
         return await this.model.create({
           data: {
             ...data,
@@ -81,8 +77,7 @@ export class BaseCRUDService<T> {
           },
         });
       } catch (error) {
-        Logger.error(error);
-        throw new HttpException('Error creating record', HttpStatus.BAD_REQUEST);
+        this.handleError(error, 'Error creating record');
       }
     }
 
@@ -95,31 +90,19 @@ export class BaseCRUDService<T> {
 
       return createdData;
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Error creating record', HttpStatus.BAD_REQUEST);
+      this.handleError(error, 'Error creating record');
     }
   }
 
-  /**
-   * Retrieves paginated records from the database based on the provided parameters.
-   *
-   * @param params - The pagination parameters.
-   * @param whereClause - The where clause to filter the records.
-   * @param include - The associations to include in the query.
-   * @param orderBy - The order by criteria for sorting the records.
-   * @returns A Promise that resolves to a PaginationVm object containing the paginated records.
-   * @throws HttpException if there is an error fetching the records.
-   */
   async genericFindAll(
-    params?: IPaginationParams | undefined,
+    params?: IPaginationParams,
     whereClause: any = {},
     include: any = {},
     orderBy: any[] = []
   ): Promise<PaginationVm> {
-    try {
-      this.model = this.initModel()
-      this.pagination = BaseCRUDService.getPaginationService();
+    this.initServices();
 
+    try {
       whereClause.deleted_at = null;
       return this.pagination.paginate(
         this.modelName,
@@ -130,45 +113,28 @@ export class BaseCRUDService<T> {
         ['name', 'description']
       );
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Error fetching records', HttpStatus.BAD_REQUEST);
+      this.handleError(error, 'Error fetching records');
     }
   }
 
-  /**
-   * Retrieves a single record by its ID.
-   *
-   * @param id - The ID of the record to retrieve.
-   * @returns A promise that resolves to the retrieved record.
-   * @throws {HttpException} If an error occurs while fetching the record.
-   */
   async genericFindOne(id: string): Promise<T> {
-    try {
-      this.model = this.initModel()
+    this.initServices();
 
+    try {
       return await this.model.findUnique({ where: { id } });
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Error fetching record', HttpStatus.NOT_FOUND);
+      this.handleError(error, 'Error fetching record');
     }
   }
 
-  /**
-   * Updates a record in the database.
-   *
-   * @param id - The ID of the record to update.
-   * @param data - The partial data to update the record with.
-   * @returns A promise that resolves to the updated record.
-   * @throws {HttpException} If there is an error updating the record.
-   */
   async genericUpdate(id: string, data: Partial<any>, connectedUserId?: string): Promise<T> {
-    const requestContext = BaseCRUDService.getRequestContextService()
-    const request: CustomRequest = requestContext.getContext()
+    this.initServices();
+
+    const requestContext = BaseCRUDService.getRequestContextService();
+    const request: CustomRequest = requestContext.getContext();
 
     if (!request.transaction) {
       try {
-        this.model = this.initModel()
-
         return await this.model.update({
           where: { id },
           data: {
@@ -177,8 +143,7 @@ export class BaseCRUDService<T> {
           }
         });
       } catch (error) {
-        Logger.error(error);
-        throw new HttpException('Error updating record', HttpStatus.BAD_REQUEST);
+        this.handleError(error, 'Error updating record');
       }
     }
 
@@ -191,68 +156,92 @@ export class BaseCRUDService<T> {
 
       return updatedData;
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Error updating record', HttpStatus.BAD_REQUEST);
+      this.handleError(error, 'Error updating record');
     }
   }
 
-  /**
-   * Deletes a record from the database based on the provided ID.
-   * 
-   * @param id - The ID of the record to delete.
-   * @returns A promise that resolves to the deleted record.
-   * @throws {HttpException} If an error occurs while deleting the record.
-   */
   async genericDelete(id: string): Promise<T> {
-    try {
-      this.model = this.initModel()
+    this.initServices();
 
-      return await this.model.delete({
-        where: { id },
-      });
+    const requestContext = BaseCRUDService.getRequestContextService();
+    const request: CustomRequest = requestContext.getContext();
+
+    if (!request.transaction) {
+      try {
+        return await this.model.delete({ where: { id } });
+      } catch (error) {
+        this.handleError(error, 'Error deleting record');
+      }
+    }
+
+    try {
+      const prisma = BaseCRUDService.getPrismaService();
+      const deletedData = await prisma.delete(this.modelName, { id });
+
+      return deletedData;
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Error deleting record', HttpStatus.BAD_REQUEST);
+      this.handleError(error, 'Error deleting record');
     }
   }
 
-  /**
-   * Soft deletes a record of type T based on the provided id.
-   * @param id - The id of the record to be soft deleted.
-   * @returns A promise that resolves to the updated record after soft deletion.
-   * @throws HttpException if an error occurs during soft deletion.
-   */
   async genericSoftDelete(id: string, connectedUserId?: string): Promise<T> {
-    try {
-      this.model = this.initModel()
+    this.initServices();
 
-      return await this.model.update({
-        where: { id },
-        data: { deleted_at: new Date(), deleted_by: connectedUserId },
+    const requestContext = BaseCRUDService.getRequestContextService();
+    const request: CustomRequest = requestContext.getContext();
+
+    if (!request.transaction) {
+      try {
+        return await this.model.update({
+          where: { id },
+          data: { deleted_at: new Date(), deleted_by: connectedUserId },
+        });
+      } catch (error) {
+        this.handleError(error, 'Error soft deleting record');
+      }
+    }
+
+    try {
+      const prisma = BaseCRUDService.getPrismaService();
+      const updatedData = await prisma.update(this.modelName, { id }, {
+        deleted_at: new Date(),
+        deleted_by: connectedUserId,
       });
+
+      return updatedData;
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Error soft deleting record', HttpStatus.BAD_REQUEST);
+      this.handleError(error, 'Error soft deleting record');
     }
   }
 
-  /**
-   * Restores a record by setting the `deletedAt` property to null.
-   * @param id - The ID of the record to restore.
-   * @returns A promise that resolves to the restored record.
-   * @throws {HttpException} If there is an error restoring the record.
-   */
   async genericRestore(id: string, connectedUserId?: string): Promise<T> {
-    try {
-      this.model = this.initModel()
+    this.initServices();
 
-      return await this.model.update({
-        where: { id },
-        data: { deleted_at: null, deleted_by: null, updated_by: connectedUserId },
+    const requestContext = BaseCRUDService.getRequestContextService();
+    const request: CustomRequest = requestContext.getContext();
+
+    if (!request.transaction) {
+      try {
+        return await this.model.update({
+          where: { id },
+          data: { deleted_at: null, deleted_by: null, updated_by: connectedUserId },
+        });
+      } catch (error) {
+        this.handleError(error, 'Error restoring record');
+      }
+    }
+
+    try {
+      const prisma = BaseCRUDService.getPrismaService();
+      const updatedData = await prisma.update(this.modelName, { id }, {
+        deleted_at: null,
+        deleted_by: null,
+        updated_by: connectedUserId,
       });
+
+      return updatedData;
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Error restoring record', HttpStatus.BAD_REQUEST);
+      this.handleError(error, 'Error restoring record');
     }
   }
 }

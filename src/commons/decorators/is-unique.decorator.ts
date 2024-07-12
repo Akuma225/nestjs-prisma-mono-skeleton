@@ -5,6 +5,9 @@ import { ModelMappingTable } from '../enums/model-mapping.enum';
 import { Injectable, Scope } from '@nestjs/common';
 import { RequestContextService } from '../services/request-context.service';
 
+/**
+ * Custom validator constraint that checks if a property value is unique in the database.
+ */
 @ValidatorConstraint({ async: true })
 @Injectable({ scope: Scope.DEFAULT })
 export class IsUniqueConstraint extends DatabaseConstraint {
@@ -12,10 +15,20 @@ export class IsUniqueConstraint extends DatabaseConstraint {
         super(requestContextService);
     }
 
+    /**
+     * Checks if the given record is unique.
+     * @param record - The record to be checked.
+     * @returns Returns true if the record is unique, false otherwise.
+     */
     checkRecord(record: any): boolean {
         return !record;
     }
 
+    /**
+     * Generates the default error message for the constraint.
+     * @param args - The validation arguments.
+     * @returns Returns the default error message.
+     */
     defaultMessage(args: ValidationArguments): string {
         return `La valeur de la propriété ${args.property} existe déjà dans la base de données.`;
     }

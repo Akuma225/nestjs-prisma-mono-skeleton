@@ -5,11 +5,11 @@ import { RequestContextService } from '../services/request-context.service';
 export class RequestContextServiceProvider {
   private static service: RequestContextService;
 
-  static setRequestContextService(service: RequestContextService) {
+  static setService(service: RequestContextService) {
     RequestContextServiceProvider.service = service;
   }
 
-  static getRequestContextService(): RequestContextService {
+  static getService(): RequestContextService {
     return RequestContextServiceProvider.service;
   }
 }
