@@ -1,3 +1,3 @@
 export enum FilePath {
-    PRODUCT_IMAGE_PATH = '/assets/uploads/',
+    PRODUCT_IMAGE_PATH = '/assets/uploads/products/',
 }
