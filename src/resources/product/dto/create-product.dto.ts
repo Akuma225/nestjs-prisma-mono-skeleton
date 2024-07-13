@@ -24,6 +24,5 @@ export class CreateProductDto {
     })
     category_id: string;
 
-    //image?: Express.Multer.File;
-    image?: string;
+    image?: Express.Multer.File;
 }

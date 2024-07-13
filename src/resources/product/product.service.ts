@@ -20,7 +20,8 @@ export class ProductService extends BaseCRUDService<Product> {
 
     return this.genericCreate({
       ...createProductDto,
-      slug
+      slug,
+      image: createProductDto.image?.filename
     }, connectedUserId, { category: true });
   }
 

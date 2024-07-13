@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, HttpException, HttpStatus, UseInterceptors, Logger, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -8,13 +8,14 @@ import { Profile } from 'src/commons/enums/profile.enum';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
 import { AuthorizationGuard } from 'src/commons/guards/authorization.guard';
 import { ProductVm } from 'src/commons/shared/viewmodels/product.vm';
-import { Transaction } from 'src/commons/decorators/transaction.decorator';
 import { CustomRequest } from 'src/commons/interfaces/custom_request';
 import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { Cacheable } from 'src/commons/decorators/cacheable.decorator';
 import { PaginationVm } from 'src/commons/shared/viewmodels/pagination.vm';
 import { ParamId } from 'src/commons/decorators/param-id.decorator';
 import { ModelMappingTable } from 'src/commons/enums/model-mapping.enum';
+import { FilePath } from 'src/commons/enums/file_path.enum';
+import { SingleFileUpload } from 'src/commons/decorators/single-file-upload.decorator';
 
 @ApiTags('Product')
 @ApiBearerAuth()
@@ -25,13 +26,22 @@ export class ProductController {
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @ApiResponse({ status: 201, type: ProductVm })
-  @Transaction()
+  @SingleFileUpload({
+    fieldName: 'image',
+    fileType: 'IMAGE',
+    fileSizeLimitMB: 8,
+    filePathEnum: FilePath.PRODUCT_IMAGE_PATH
+  })
   @Post()
   async create(
     @Body() createProductDto: CreateProductDto,
-    @Req() req: CustomRequest
+    @Req() req: CustomRequest,
+    @UploadedFile() image: Express.Multer.File
   ) {
-    return ProductVm.create(await this.productService.create(createProductDto, req.user?.id));
+    return ProductVm.create(await this.productService.create({
+      ...createProductDto,
+      image
+    }, req.user?.id));
   }
 
   @Get()

@@ -2,6 +2,7 @@ import { ApiResponseProperty } from "@nestjs/swagger";
 import { BaseVm } from "./base.vm";
 import { CategoryVm } from "./category.vm";
 import { Product } from "src/resources/product/entities/product.entity";
+import { FilePath } from "src/commons/enums/file_path.enum";
 
 export class ProductVm extends BaseVm {
     @ApiResponseProperty()
@@ -32,7 +33,7 @@ export class ProductVm extends BaseVm {
         this.slug = data.slug;
         this.description = data.description;
         this.price = data.price;
-        this.image = data.image;
+        this.image = data.image ? `${process.env.APP_BASE_URL}${FilePath.PRODUCT_IMAGE_PATH}${data.image}` : null;
         this.category = new CategoryVm(data.category);
     }
 }

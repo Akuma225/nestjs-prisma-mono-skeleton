@@ -9,5 +9,6 @@ export interface CustomRequest extends Request {
   pagination: IPaginationParams
   user: UserData
   extended_audit: boolean
-  transaction?: boolean
+  transaction?: boolean,
+  filesToDelete?: string[]
 }
