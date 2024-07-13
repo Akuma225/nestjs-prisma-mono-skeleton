@@ -30,7 +30,7 @@ export class ProductController {
   @SingleFileUpload({
     fieldName: 'image',
     fileType: 'IMAGE',
-    fileSizeLimitMB: 1,
+    fileSizeLimitMB: parseInt(process.env.MULTER_MAX_FILE_SIZE),
     filePathEnum: FilePath.PRODUCT_IMAGE_PATH
   })
   @Post()
