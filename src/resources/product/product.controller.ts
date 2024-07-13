@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Http
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SetProfile } from 'src/commons/decorators/set-profile.decorator';
 import { Profile } from 'src/commons/enums/profile.enum';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
@@ -25,11 +25,12 @@ export class ProductController {
 
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, type: ProductVm })
   @SingleFileUpload({
     fieldName: 'image',
     fileType: 'IMAGE',
-    fileSizeLimitMB: 8,
+    fileSizeLimitMB: 1,
     filePathEnum: FilePath.PRODUCT_IMAGE_PATH
   })
   @Post()

@@ -19,7 +19,7 @@ export function SingleFileUpload(
     return applyDecorators(
         UseInterceptors(
             fileInterceptor,
-            FileCleanupInterceptor,
+            FileCleanupInterceptor
         ),
     );
 }
