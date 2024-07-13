@@ -65,16 +65,27 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @ApiConsumes('multipart/form-data')
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @SingleFileUpload({
+    fieldName: 'image',
+    fileType: 'IMAGE',
+    fileSizeLimitMB: parseInt(process.env.MULTER_MAX_FILE_SIZE),
+    filePathEnum: FilePath.PRODUCT_IMAGE_PATH
+  })
   @ApiResponse({ status: 200, type: ProductVm })
   async update(
     @ParamId({ model: ModelMappingTable.PRODUCT, errorMessage: "Le produit n'existe pas !" })
     id: string,
     @Body() updateCategoryDto: UpdateProductDto,
+    @UploadedFile() image: Express.Multer.File,
     @Req() req: CustomRequest
   ) {
-    return ProductVm.create(await this.productService.update(id, updateCategoryDto, req.user?.id));
+    return ProductVm.create(await this.productService.update(id, {
+      ...updateCategoryDto,
+      image
+    }, req.user?.id));
   }
 
   @Delete(':id')

@@ -38,7 +38,8 @@ export class ProductService extends BaseCRUDService<Product> {
 
     return this.genericUpdate(id, {
       ...updateProductDto,
-      slug
+      slug,
+      image: updateProductDto.image ? updateProductDto.image.filename : undefined
     }, connectedUserId, { category: true });
   }
 
