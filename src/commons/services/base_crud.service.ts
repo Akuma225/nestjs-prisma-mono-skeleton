@@ -62,7 +62,12 @@ export class BaseCRUDService<T> {
     throw new HttpException(message, HttpStatus.BAD_REQUEST);
   }
 
-  async genericCreate(data: any, connectedUserId?: string): Promise<T> {
+  async genericCreate(
+    data: any,
+    connectedUserId?: string,
+    include: any = {},
+    select: any = {}
+  ): Promise<T> {
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -75,6 +80,8 @@ export class BaseCRUDService<T> {
             ...data,
             created_by: connectedUserId,
           },
+          include,
+          select: !include ? select : undefined,
         });
       } catch (error) {
         this.handleError(error, 'Error creating record');
@@ -86,7 +93,7 @@ export class BaseCRUDService<T> {
       const createdData = await prisma.create(this.modelName, {
         ...data,
         created_by: connectedUserId,
-      });
+      }, include, select);
 
       return createdData;
     } catch (error) {
@@ -98,6 +105,7 @@ export class BaseCRUDService<T> {
     params?: IPaginationParams,
     whereClause: any = {},
     include: any = {},
+    select: any = {},
     orderBy: any[] = []
   ): Promise<PaginationVm> {
     this.initServices();
@@ -109,6 +117,7 @@ export class BaseCRUDService<T> {
         whereClause,
         include,
         orderBy,
+        select,
         params,
         ['name', 'description']
       );
@@ -117,17 +126,31 @@ export class BaseCRUDService<T> {
     }
   }
 
-  async genericFindOne(id: string): Promise<T> {
+  async genericFindOne(
+    id: string,
+    include: any = {},
+    select: any = {}
+  ): Promise<T> {
     this.initServices();
 
     try {
-      return await this.model.findUnique({ where: { id } });
+      return await this.model.findUnique({
+        where: { id },
+        include,
+        select: !include ? select : undefined,
+      });
     } catch (error) {
       this.handleError(error, 'Error fetching record');
     }
   }
 
-  async genericUpdate(id: string, data: Partial<any>, connectedUserId?: string): Promise<T> {
+  async genericUpdate(
+    id: string,
+    data: Partial<any>,
+    connectedUserId?: string,
+    include: any = {},
+    select: any = {}
+  ): Promise<T> {
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -140,7 +163,9 @@ export class BaseCRUDService<T> {
           data: {
             ...data,
             updated_by: connectedUserId,
-          }
+          },
+          include,
+          select: !include ? select : undefined
         });
       } catch (error) {
         this.handleError(error, 'Error updating record');
@@ -152,7 +177,7 @@ export class BaseCRUDService<T> {
       const updatedData = await prisma.update(this.modelName, { id }, {
         ...data,
         updated_by: connectedUserId,
-      });
+      }, include, select);
 
       return updatedData;
     } catch (error) {
@@ -160,7 +185,9 @@ export class BaseCRUDService<T> {
     }
   }
 
-  async genericDelete(id: string): Promise<T> {
+  async genericDelete(
+    id: string
+  ): Promise<T> {
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -184,7 +211,12 @@ export class BaseCRUDService<T> {
     }
   }
 
-  async genericSoftDelete(id: string, connectedUserId?: string): Promise<T> {
+  async genericSoftDelete(
+    id: string,
+    connectedUserId?: string,
+    include: any = {},
+    select: any = {}
+  ): Promise<T> {
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -195,6 +227,8 @@ export class BaseCRUDService<T> {
         return await this.model.update({
           where: { id },
           data: { deleted_at: new Date(), deleted_by: connectedUserId },
+          include,
+          select: !include ? select : undefined
         });
       } catch (error) {
         this.handleError(error, 'Error soft deleting record');
@@ -206,7 +240,7 @@ export class BaseCRUDService<T> {
       const updatedData = await prisma.update(this.modelName, { id }, {
         deleted_at: new Date(),
         deleted_by: connectedUserId,
-      });
+      }, include, select);
 
       return updatedData;
     } catch (error) {
@@ -214,7 +248,13 @@ export class BaseCRUDService<T> {
     }
   }
 
-  async genericRestore(id: string, connectedUserId?: string): Promise<T> {
+  async genericRestore(
+    id: string,
+    connectedUserId?: string,
+    include: any = {},
+    select: any = {},
+    orderBy: any[] = []
+  ): Promise<T> {
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -225,6 +265,9 @@ export class BaseCRUDService<T> {
         return await this.model.update({
           where: { id },
           data: { deleted_at: null, deleted_by: null, updated_by: connectedUserId },
+          include,
+          select: !include ? select : undefined,
+          orderBy
         });
       } catch (error) {
         this.handleError(error, 'Error restoring record');
@@ -237,7 +280,7 @@ export class BaseCRUDService<T> {
         deleted_at: null,
         deleted_by: null,
         updated_by: connectedUserId,
-      });
+      }, include, select);
 
       return updatedData;
     } catch (error) {

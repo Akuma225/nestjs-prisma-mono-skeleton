@@ -14,7 +14,6 @@ import { AuthorizationGuard } from 'src/commons/guards/authorization.guard';
 import { SetProfile } from 'src/commons/decorators/set-profile.decorator';
 import { Profile } from 'src/commons/enums/profile.enum';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
-import { Transaction } from 'src/commons/decorators/transaction.decorator';
 
 @ApiTags('Category')
 @ApiBearerAuth()
@@ -32,7 +31,7 @@ export class CategoryController {
   ) {
     return CategoryVm.create(await this.categoryService.create({
       ...createCategoryDto
-    }, req.user?.id), req.extended_audit);
+    }, req.user?.id));
   }
 
   @Get()
@@ -42,7 +41,7 @@ export class CategoryController {
   async findAll(
     @Req() req: CustomRequest,
   ) {
-    return CategoryVm.createPaginated(await this.categoryService.findAll(req.pagination), req.extended_audit);
+    return CategoryVm.createPaginated(await this.categoryService.findAll(req.pagination));
   }
 
   @Get(':id')
@@ -50,9 +49,8 @@ export class CategoryController {
   @Cacheable()
   async findOne(
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string,
-    @Req() req: CustomRequest
   ) {
-    return CategoryVm.create(await this.categoryService.findOne(id), req.extended_audit);
+    return CategoryVm.create(await this.categoryService.findOne(id));
   }
 
   @Patch(':id')
@@ -65,7 +63,7 @@ export class CategoryController {
     @Body() updateCategoryDto: UpdateCategoryDto,
     @Req() req: CustomRequest
   ) {
-    return CategoryVm.create(await this.categoryService.update(id, updateCategoryDto, req.user?.id), req.extended_audit);
+    return CategoryVm.create(await this.categoryService.update(id, updateCategoryDto, req.user?.id));
   }
 
   @Delete(':id')
@@ -89,7 +87,7 @@ export class CategoryController {
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string,
     @Req() req: CustomRequest
   ) {
-    return CategoryVm.create(await this.categoryService.softDelete(id, req.user?.id), req.extended_audit);
+    return CategoryVm.create(await this.categoryService.softDelete(id, req.user?.id));
   }
 
   @Patch(':id/restore')
@@ -100,6 +98,6 @@ export class CategoryController {
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string,
     @Req() req: CustomRequest
   ) {
-    return CategoryVm.create(await this.categoryService.restore(id, req.user?.id), req.extended_audit);
+    return CategoryVm.create(await this.categoryService.restore(id, req.user?.id));
   }
 }

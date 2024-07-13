@@ -15,7 +15,7 @@ export class CategoryService extends BaseCRUDService<Category> {
     super(modelName);
   }
 
-  async create(createCategoryDto: CreateCategoryDto, connectedUserId?: string) {
+  create(createCategoryDto: CreateCategoryDto, connectedUserId?: string) {
     const slug = this.slugService.slugify(createCategoryDto.name);
 
     return this.genericCreate({
@@ -33,7 +33,7 @@ export class CategoryService extends BaseCRUDService<Category> {
   }
 
   update(id: string, updateCategoryDto: UpdateCategoryDto, connectedUserId?: string) {
-    const slug = this.slugService.slugify(updateCategoryDto.name);
+    let slug = updateCategoryDto.name ? this.slugService.slugify(updateCategoryDto.name) : undefined;
 
     return this.genericUpdate(id, {
       ...updateCategoryDto,

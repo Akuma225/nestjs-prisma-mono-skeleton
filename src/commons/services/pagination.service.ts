@@ -22,6 +22,7 @@ export class PaginationService {
     where: any,
     include: any,
     orderBy: any[],
+    select: any,
     params: IPaginationParams,
     searchables?: string[]
   ): Promise<PaginationVm> {
@@ -51,7 +52,9 @@ export class PaginationService {
     // If order parameter is provided, split it by comma and map it to the orderBy array. Example: order=category.name,asc => orderBy: [{ category: { name: 'asc' } }]
 
     if (params.order) {
-      orderBy = this.generateOrderBy(params)
+      const generateOrderBy = this.generateOrderBy(params)
+      // Merge the generated orderBy array with the existing orderBy array.
+      orderBy = [...orderBy, ...generateOrderBy]
     }
 
     // If search parameter is provided, filter the data based on the searchables array.
@@ -90,6 +93,7 @@ export class PaginationService {
       include: ${JSON.stringify(include)},
       orderBy: ${JSON.stringify(orderBy)},
       page: ${params.page},
+      Select: ${JSON.stringify(select)},
       limit: ${limit},
       skip: ${skip},
     `)
@@ -99,6 +103,7 @@ export class PaginationService {
       include,
       orderBy,
       skip,
+      select: !include ? select : undefined,
       take: limit,
     })
 
