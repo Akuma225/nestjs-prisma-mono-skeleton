@@ -62,9 +62,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
    * @returns The created record.
    * @throws {Error} If an error occurs while creating the record.
    */
-  async create(model: string, data: any, include?: any) {
+  async create(model: string, data: any, include?: any, select?: any) {
     try {
-      const createdData = await this[model].create({ data, include });
+      const createdData = await this[model].create({
+        data,
+        include,
+        select: !include ? select : undefined
+      });
       this.transactionLog.push({ model, action: 'create', data: { where: { id: createdData.id } } });
       Logger.log(`Created record in ${model}`, JSON.stringify(createdData));
       return createdData;
@@ -84,13 +88,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
    * @returns The updated record.
    * @throws {Error} If an error occurs while updating the record.
    */
-  async update(model: string, where: any, data: any, include?: any) {
+  async update(model: string, where: any, data: any, include?: any, select?: any) {
     try {
       const previousData = await this[model].findUnique({ where });
       if (!previousData) {
         throw new Error(`Record not found for update in ${model}`);
       }
-      const updatedData = await this[model].update({ where, data, include });
+      const updatedData = await this[model].update({
+        where,
+        data,
+        include,
+        select: !include ? select : undefined
+      });
       this.transactionLog.push({ model, action: 'update', data: { where, previousData } });
       Logger.log(`Updated record in ${model}`, JSON.stringify(updatedData));
       return updatedData;

@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { BaseCRUDService } from 'src/commons/services/base_crud.service';
+import { Product } from './entities/product.entity';
+import { SlugService } from 'src/commons/services/slug.service';
+import { IPaginationParams } from 'src/commons/interfaces/pagination-params';
 
 @Injectable()
-export class ProductService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+export class ProductService extends BaseCRUDService<Product> {
+  constructor(
+    protected readonly slugService: SlugService,
+    @Inject('MODEL_MAPPING') modelName: string,
+  ) {
+    super(modelName);
   }
 
-  findAll() {
-    return `This action returns all product`;
+  create(createProductDto: CreateProductDto, connectedUserId: string) {
+    const slug = this.slugService.slugify(createProductDto.name);
+
+    return this.genericCreate({
+      ...createProductDto,
+      slug
+    }, connectedUserId, { category: true });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  findAll(params?: IPaginationParams | undefined) {
+    return this.genericFindAll(params, {}, { category: true });
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  findOne(id: string) {
+    return this.genericFindOne(id, { category: true });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  update(id: string, updateProductDto: UpdateProductDto, connectedUserId: string) {
+    let slug = updateProductDto.name ? this.slugService.slugify(updateProductDto.name) : undefined;
+
+    return this.genericUpdate(id, {
+      ...updateProductDto,
+      slug
+    }, connectedUserId, { category: true });
+  }
+
+  remove(id: string) {
+    return this.genericDelete(id);
+  }
+
+  softDelete(id: string, connectedUserId?: string) {
+    return this.genericSoftDelete(id, connectedUserId, { category: true });
+  }
+
+  restore(id: string, connectedUserId?: string) {
+    return this.genericRestore(id, connectedUserId, { category: true });
   }
 }

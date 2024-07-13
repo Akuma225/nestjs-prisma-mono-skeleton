@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, HttpException, HttpStatus } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -8,6 +8,13 @@ import { Profile } from 'src/commons/enums/profile.enum';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
 import { AuthorizationGuard } from 'src/commons/guards/authorization.guard';
 import { ProductVm } from 'src/commons/shared/viewmodels/product.vm';
+import { Transaction } from 'src/commons/decorators/transaction.decorator';
+import { CustomRequest } from 'src/commons/interfaces/custom_request';
+import { Pagination } from 'src/commons/decorators/pagination.decorator';
+import { Cacheable } from 'src/commons/decorators/cacheable.decorator';
+import { PaginationVm } from 'src/commons/shared/viewmodels/pagination.vm';
+import { ParamId } from 'src/commons/decorators/param-id.decorator';
+import { ModelMappingTable } from 'src/commons/enums/model-mapping.enum';
 
 @ApiTags('Product')
 @ApiBearerAuth()
@@ -18,29 +25,79 @@ export class ProductController {
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @ApiResponse({ status: 201, type: ProductVm })
+  @Transaction()
   @Post()
-  async create(@Body() createProductDto: CreateProductDto) {
-    console.log(createProductDto);
-    return this.productService.create(createProductDto);
+  async create(
+    @Body() createProductDto: CreateProductDto,
+    @Req() req: CustomRequest
+  ) {
+    return ProductVm.create(await this.productService.create(createProductDto, req.user?.id));
   }
 
   @Get()
-  findAll() {
-    return this.productService.findAll();
+  @Pagination()
+  @Cacheable()
+  @ApiResponse({ status: 200, type: PaginationVm })
+  async findAll(
+    @Req() req: CustomRequest,
+  ) {
+    return ProductVm.createPaginated(await this.productService.findAll(req.pagination));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  @ApiResponse({ status: 200, type: ProductVm })
+  @Cacheable()
+  async findOne(
+    @ParamId({ model: ModelMappingTable.PRODUCT, errorMessage: "Le produit n'existe pas !" }) id: string
+  ) {
+    return ProductVm.create(await this.productService.findOne(id));
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @ApiResponse({ status: 200, type: ProductVm })
+  async update(
+    @ParamId({ model: ModelMappingTable.PRODUCT, errorMessage: "Le produit n'existe pas !" })
+    id: string,
+    @Body() updateCategoryDto: UpdateProductDto,
+    @Req() req: CustomRequest
+  ) {
+    return ProductVm.create(await this.productService.update(id, updateCategoryDto, req.user?.id));
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @ApiResponse({ status: 204, description: "Le produit a été définitivement supprimée !" })
+  async remove(
+    @ParamId({ model: ModelMappingTable.PRODUCT, errorMessage: "Le produit n'existe pas !" }) id: string
+  ) {
+    await this.productService.remove(id);
+
+    // Return success message with status code 204
+    throw new HttpException("Le produit a été définitivement supprimée !", HttpStatus.NO_CONTENT);
+  }
+
+  @Delete(':id/soft')
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @ApiResponse({ status: 200, type: ProductVm })
+  async softDelete(
+    @ParamId({ model: ModelMappingTable.PRODUCT, errorMessage: "Le produit n'existe pas !" }) id: string,
+    @Req() req: CustomRequest
+  ) {
+    return ProductVm.create(await this.productService.softDelete(id, req.user?.id));
+  }
+
+  @Patch(':id/restore')
+  @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @ApiResponse({ status: 200, type: ProductVm })
+  async restore(
+    @ParamId({ model: ModelMappingTable.PRODUCT, errorMessage: "Le produit n'existe pas !" }) id: string,
+    @Req() req: CustomRequest
+  ) {
+    return ProductVm.create(await this.productService.restore(id, req.user?.id));
   }
 }
