@@ -35,10 +35,10 @@ export function createFilesInterceptor(
             filename: function (req: CustomRequest, file, cb) {
                 const uniqueSuffix = Date.now() + Math.round(Math.random() * 1E9) + '.' + file.mimetype.split('/')[1];
                 const filePath = join(process.cwd(), data.find(x => x.fieldName === file.fieldname).filePathEnum, uniqueSuffix);
-                if (!req.filesToDelete) {
-                    req.filesToDelete = [];
+                if (!req.savedFiles) {
+                    req.savedFiles = [];
                 }
-                req.filesToDelete.push(filePath);
+                req.savedFiles.push(filePath);
                 cb(null, uniqueSuffix);
             }
         }),

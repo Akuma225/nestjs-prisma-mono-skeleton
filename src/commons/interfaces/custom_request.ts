@@ -10,5 +10,5 @@ export interface CustomRequest extends Request {
   user: UserData
   extended_audit: boolean
   transaction?: boolean,
-  filesToDelete?: string[]
+  savedFiles?: string[]
 }
