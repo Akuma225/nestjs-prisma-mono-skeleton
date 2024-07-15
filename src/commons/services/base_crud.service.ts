@@ -252,8 +252,7 @@ export class BaseCRUDService<T> {
     id: string,
     connectedUserId?: string,
     include: any = {},
-    select: any = {},
-    orderBy: any[] = []
+    select: any = {}
   ): Promise<T> {
     this.initServices();
 
@@ -266,8 +265,7 @@ export class BaseCRUDService<T> {
           where: { id },
           data: { deleted_at: null, deleted_by: null, updated_by: connectedUserId },
           include,
-          select: !include ? select : undefined,
-          orderBy
+          select: !include ? select : undefined
         });
       } catch (error) {
         this.handleError(error, 'Error restoring record');

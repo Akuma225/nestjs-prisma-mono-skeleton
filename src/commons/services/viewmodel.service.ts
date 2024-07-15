@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { AuditProperties } from '../enums/audit_properties.enum';
-import { UserMinVm } from '../shared/viewmodels/user.vm';
+import { UserMinVm } from '../shared/viewmodels/user.min.vm';
 
 @Injectable()
 export class ViewmodelService {

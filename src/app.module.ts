@@ -25,6 +25,8 @@ import { SecurityService } from './commons/services/security.service';
 import { StorageService } from './commons/services/storage.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DeleteNonUsedFilesCron } from './commons/crons/delete-non-used-files.cron';
+import { AdminModule } from './resources/admin/admin.module';
+import { UserModule } from './resources/user/user.module';
 
 /**
  * Module principal de l'application.
@@ -47,6 +49,8 @@ import { DeleteNonUsedFilesCron } from './commons/crons/delete-non-used-files.cr
     AuthModule,
     ProductModule,
     CategoryModule,
+    UserModule,
+    AdminModule,
   ],
   providers: [
     // Interceptors globaux

@@ -15,7 +15,7 @@ export class DeleteNonUsedFilesCron {
         private readonly prismaService: PrismaService,
     ) { }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_DAY_AT_8AM)
     handleCron() {
         Logger.log('Deleting non-used files...');
         const DELETE_NON_USED_IMAGES_CRON = this.configService.get<boolean>('DELETE_NON_USED_IMAGES_CRON');
