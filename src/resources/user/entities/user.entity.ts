@@ -11,4 +11,5 @@ export class User extends AuditEntity {
     is_first_login: boolean;
     mail_verified_at: Date;
     profile: Profile;
+    password: string;
 }

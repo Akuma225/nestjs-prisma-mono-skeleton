@@ -144,6 +144,24 @@ export class BaseCRUDService<T> {
     }
   }
 
+  async genericFindOneBy(
+    whereClause: any,
+    include: any = {},
+    select: any = {}
+  ): Promise<T> {
+    this.initServices();
+
+    try {
+      return await this.model.findFirst({
+        where: whereClause,
+        include,
+        select: !include ? select : undefined,
+      });
+    } catch (error) {
+      this.handleError(error, 'Error fetching record');
+    }
+  }
+
   async genericUpdate(
     id: string,
     data: Partial<any>,
