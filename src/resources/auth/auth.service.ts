@@ -69,7 +69,7 @@ export class AuthService {
                 profile: Profile[data.profile],
                 password: await bcrypt.hash(data.password, 10),
                 is_active: true,
-                is_first_login: true
+                is_first_login: false
             }
         });
 

@@ -22,6 +22,11 @@ import { RequestContextServiceProvider } from './commons/providers/request-conte
 import { IsDataExistsConstraint } from './commons/decorators/is-data-exists.decorator';
 import { ViewmodelServiceProvider } from './commons/providers/viewmodel-service.provider';
 import { SecurityService } from './commons/services/security.service';
+import { StorageService } from './commons/services/storage.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { DeleteNonUsedFilesCron } from './commons/crons/delete-non-used-files.cron';
+import { AdminModule } from './resources/admin/admin.module';
+import { UserModule } from './resources/user/user.module';
 
 /**
  * Module principal de l'application.
@@ -39,10 +44,13 @@ import { SecurityService } from './commons/services/security.service';
         limit: 10,
       },
     ]),
+    ScheduleModule.forRoot(),
     // Modules de ressources
     AuthModule,
     ProductModule,
     CategoryModule,
+    UserModule,
+    AdminModule,
   ],
   providers: [
     // Interceptors globaux
@@ -75,9 +83,12 @@ import { SecurityService } from './commons/services/security.service';
     RequestContextService,
     RequestContextServiceProvider,
     SecurityService,
+    StorageService,
     // Decorators personnalisés
     IsUniqueConstraint,
     IsDataExistsConstraint,
+    // CRONs
+    DeleteNonUsedFilesCron,
   ],
   exports: [
     // Exporte les services globaux pour être utilisés dans d'autres modules
@@ -92,8 +103,10 @@ import { SecurityService } from './commons/services/security.service';
     RequestContextService,
     RequestContextServiceProvider,
     SecurityService,
+    StorageService,
     IsUniqueConstraint,
     IsDataExistsConstraint,
+    DeleteNonUsedFilesCron,
   ],
 })
 export class AppModule implements OnModuleInit {

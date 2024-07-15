@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Http
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SetProfile } from 'src/commons/decorators/set-profile.decorator';
 import { Profile } from 'src/commons/enums/profile.enum';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
@@ -25,11 +25,12 @@ export class ProductController {
 
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, type: ProductVm })
   @SingleFileUpload({
     fieldName: 'image',
     fileType: 'IMAGE',
-    fileSizeLimitMB: 8,
+    fileSizeLimitMB: parseInt(process.env.MULTER_MAX_FILE_SIZE),
     filePathEnum: FilePath.PRODUCT_IMAGE_PATH
   })
   @Post()
@@ -64,16 +65,27 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @ApiConsumes('multipart/form-data')
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @SingleFileUpload({
+    fieldName: 'image',
+    fileType: 'IMAGE',
+    fileSizeLimitMB: parseInt(process.env.MULTER_MAX_FILE_SIZE),
+    filePathEnum: FilePath.PRODUCT_IMAGE_PATH
+  })
   @ApiResponse({ status: 200, type: ProductVm })
   async update(
     @ParamId({ model: ModelMappingTable.PRODUCT, errorMessage: "Le produit n'existe pas !" })
     id: string,
     @Body() updateCategoryDto: UpdateProductDto,
+    @UploadedFile() image: Express.Multer.File,
     @Req() req: CustomRequest
   ) {
-    return ProductVm.create(await this.productService.update(id, updateCategoryDto, req.user?.id));
+    return ProductVm.create(await this.productService.update(id, {
+      ...updateCategoryDto,
+      image
+    }, req.user?.id));
   }
 
   @Delete(':id')

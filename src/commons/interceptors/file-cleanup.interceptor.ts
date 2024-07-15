@@ -16,8 +16,8 @@ export class FileCleanupInterceptor implements NestInterceptor {
 
         return next.handle().pipe(
             catchError((err) => {
-                if (request.filesToDelete) {
-                    request.filesToDelete.forEach((filePath: string) => {
+                if (request.savedFiles) {
+                    request.savedFiles.forEach((filePath: string) => {
                         unlink(filePath, (error) => {
                             if (error) {
                                 Logger.error(`Failed to delete file ${filePath}:`, error);

@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { UserMinVm } from './user.vm';
+import { UserMinVm } from './user.min.vm';
 
 export class AuditVm {
   @ApiResponseProperty()

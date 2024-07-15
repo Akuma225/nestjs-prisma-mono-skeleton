@@ -19,7 +19,7 @@ export function SingleFileUpload(
     return applyDecorators(
         UseInterceptors(
             fileInterceptor,
-            FileCleanupInterceptor,
+            FileCleanupInterceptor
         ),
     );
 }
@@ -37,10 +37,10 @@ export function createFileInterceptor(
             filename: function (req: CustomRequest, file, cb) {
                 const uniqueSuffix = Date.now() + Math.round(Math.random() * 1E9) + '.' + file.mimetype.split('/')[1];
                 const filePath = join(process.cwd(), filePathEnum, uniqueSuffix);
-                if (!req.filesToDelete) {
-                    req.filesToDelete = [];
+                if (!req.savedFiles) {
+                    req.savedFiles = [];
                 }
-                req.filesToDelete.push(filePath);
+                req.savedFiles.push(filePath);
                 cb(null, uniqueSuffix);
             }
         }),
