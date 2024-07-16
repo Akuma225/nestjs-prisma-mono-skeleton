@@ -20,16 +20,22 @@ export class ReferenceService {
    * @throws {HttpException} If the table corresponding to the prefix is not found.
    */
   async generate(
-    prefix: ModelMappingPrefix,
+    key: string,
     length: number = 10,
     referenceField: string = 'reference'
   ): Promise<string> {
+    const prefix = ModelMappingPrefix[key];
+
+    if (!prefix) {
+      throw new HttpException('Préfixe non trouvé: ' + key, 500);
+    }
+
     const reference = `${prefix}-${generateRandomString(length)}`;
 
     const table = ModelMappingTable[prefix];
 
     if (!table) {
-      throw new HttpException('Table non trouvée', 500);
+      throw new HttpException('Table non trouvée: ' + table, 500);
     }
 
     // Type assertion to inform TypeScript of the correct model type
