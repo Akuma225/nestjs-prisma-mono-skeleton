@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { ApiResponseProperty } from '@nestjs/swagger';
 import { BaseVm } from './base.vm';
 
 export class BasicVm extends BaseVm {
@@ -6,16 +6,15 @@ export class BasicVm extends BaseVm {
     super(data);
     this.id = data.id;
     this.name = data.name;
-    this.reference = data.reference || null;
+    this.reference = data.reference;
   }
 
-  @IsString()
+  @ApiResponseProperty()
   id: string;
 
-  @IsString()
+  @ApiResponseProperty()
   name: string;
 
-  @IsString()
-  @IsOptional()
+  @ApiResponseProperty()
   reference?: string;
 }

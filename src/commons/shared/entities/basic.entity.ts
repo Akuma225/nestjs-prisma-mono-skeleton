@@ -1,4 +1,3 @@
-import { IsOptional, IsString } from 'class-validator';
 import { AuditEntity } from './audit.entity';
 
 export class BasicEntity extends AuditEntity {
@@ -6,16 +5,10 @@ export class BasicEntity extends AuditEntity {
     super();
     this.id = data.id;
     this.name = data.name;
-    this.reference = data.reference || null;
+    this.reference = data.reference;
   }
 
-  @IsString()
   id?: string;
-
-  @IsString()
   name: string;
-
-  @IsString()
-  @IsOptional()
   reference?: string;
 }
