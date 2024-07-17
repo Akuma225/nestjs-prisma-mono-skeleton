@@ -1,7 +1,7 @@
 import { Profile } from "src/commons/enums/profile.enum";
 import { AuditEntity } from "src/commons/shared/entities/audit.entity";
 
-export class User extends AuditEntity {
+export class UserEntity extends AuditEntity {
     id: string;
     firstname: string;
     lastname: string;

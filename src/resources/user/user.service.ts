@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseCRUDService } from 'src/commons/services/base_crud.service';
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 import { UpdateUserMapper } from './mappers/update-user.mapper';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from "bcrypt"
 
 @Injectable()
-export class UserService extends BaseCRUDService<User> {
+export class UserService extends BaseCRUDService<UserEntity> {
     constructor(
         @Inject('MODEL_MAPPING') modelName: string,
     ) {
