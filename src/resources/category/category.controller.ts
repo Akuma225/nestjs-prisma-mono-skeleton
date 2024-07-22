@@ -73,7 +73,7 @@ export class CategoryController {
   async remove(
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string
   ) {
-    await this.categoryService.remove(id);
+    await this.categoryService.delete(id);
 
     // Return success message with status code 204
     throw new HttpException("La catégorie a été définitivement supprimée !", HttpStatus.NO_CONTENT);

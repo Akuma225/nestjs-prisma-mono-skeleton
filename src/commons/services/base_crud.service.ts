@@ -14,7 +14,7 @@ import { CustomRequest } from '../interfaces/custom_request';
  * @template T - The type of the model.
  */
 @Injectable()
-export class BaseCRUDService<T> {
+export abstract class BaseCRUDService<T> {
   protected readonly modelName: string;
   protected model: any;
   protected pagination: PaginationService;
@@ -303,4 +303,14 @@ export class BaseCRUDService<T> {
       this.handleError(error, 'Error restoring record');
     }
   }
+
+  // Méthodes abstraites à implémenter par les classes dérivées
+  abstract create(data: any, connectedUserId?: string, include?: any, select?: any): Promise<T>;
+  abstract findAll(params?: IPaginationParams, whereClause?: any, include?: any, select?: any, orderBy?: any[]): Promise<PaginationVm>;
+  abstract findOne(id: string, include?: any, select?: any): Promise<T>;
+  abstract findOneBy(whereClause: any, include?: any, select?: any): Promise<T>;
+  abstract update(id: string, data: Partial<any>, connectedUserId?: string, include?: any, select?: any): Promise<T>;
+  abstract delete(id: string): Promise<T>;
+  abstract softDelete(id: string, connectedUserId?: string, include?: any, select?: any): Promise<T>;
+  abstract restore(id: string, connectedUserId?: string, include?: any, select?: any): Promise<T>;
 }

@@ -95,7 +95,7 @@ export class ProductController {
   async remove(
     @ParamId({ model: ModelMappingTable.PRODUCT, errorMessage: "Le produit n'existe pas !" }) id: string
   ) {
-    await this.productService.remove(id);
+    await this.productService.delete(id);
 
     // Return success message with status code 204
     throw new HttpException("Le produit a été définitivement supprimée !", HttpStatus.NO_CONTENT);

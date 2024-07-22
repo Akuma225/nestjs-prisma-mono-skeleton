@@ -75,7 +75,7 @@ export class AdminController {
   async remove(
     @ParamId({ model: ModelMappingTable.USER, errorMessage: "L'admin n'existe pas !" }) id: string
   ) {
-    await this.adminService.remove(id);
+    await this.adminService.delete(id);
 
     // Return success message with status code 204
     throw new HttpException("La catégorie a été définitivement supprimée !", HttpStatus.NO_CONTENT);
