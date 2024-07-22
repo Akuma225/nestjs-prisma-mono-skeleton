@@ -27,6 +27,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DeleteNonUsedFilesCron } from './commons/crons/delete-non-used-files.cron';
 import { AdminModule } from './resources/admin/admin.module';
 import { UserModule } from './resources/user/user.module';
+import { BootstrapService } from './commons/services/bootstrap.service';
 
 /**
  * Module principal de l'application.
@@ -71,6 +72,7 @@ import { UserModule } from './resources/user/user.module';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    BootstrapService,
     // Services principaux
     PrismaService,
     PrismaServiceProvider,

@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { BaseCRUDService } from 'src/commons/services/base_crud.service';
-import { User } from '../user/entities/user.entity';
+import { UserEntity } from '../user/entities/user.entity';
 import { CreateAdminMapper } from './mappers/create-admin.mapper';
 import { IPaginationParams } from 'src/commons/interfaces/pagination-params';
 import { Profile } from 'src/commons/enums/profile.enum';
@@ -10,7 +10,7 @@ import * as bcrypt from "bcrypt"
 import { UpdateAdminMapper } from './mappers/update-admin.mapper';
 
 @Injectable()
-export class AdminService extends BaseCRUDService<User> {
+export class AdminService extends BaseCRUDService<UserEntity> {
   constructor(
     @Inject('MODEL_MAPPING') modelName: string,
   ) {

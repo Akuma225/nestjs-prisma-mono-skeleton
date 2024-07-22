@@ -47,7 +47,14 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   // Configure le pipe global de validation
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    forbidNonWhitelisted: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+    },
+  }));
 
   // Configure les fichiers statiques à servir depuis le dossier 'assets'
   app.useStaticAssets(join(__dirname, '..', 'assets'), {
@@ -59,6 +66,7 @@ async function bootstrap() {
     .setTitle(APP_NAME)
     .setDescription(BACK_OFFICE_DESCRIPTION)
     .setVersion(APP_VERSION)
+    .addBearerAuth()
     .build();
   const backOfficeDocument = SwaggerModule.createDocument(
     app,

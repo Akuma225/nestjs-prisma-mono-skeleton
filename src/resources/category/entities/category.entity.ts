@@ -1,6 +1,6 @@
 import { AuditEntity } from "src/commons/shared/entities/audit.entity";
 
-export class Category extends AuditEntity {
+export class CategoryEntity extends AuditEntity {
     id: number;
     name: string;
     slug: string;

@@ -1,45 +1,19 @@
-import { IsBoolean, IsDate, IsEnum, IsString } from 'class-validator';
 import { Profile } from 'src/commons/enums/profile.enum';
 
 export class UserData {
 
-  @IsString()
   id: string;
-
-  @IsString()
   firstname: string;
-
-  @IsString()
   lastname: string;
-
-  @IsString()
   email: string;
-
-  @IsEnum(Profile)
   profile: Profile;
-
-  @IsString()
   contact: string;
-
-  @IsBoolean()
   is_active: boolean;
-
-  @IsString()
   auto_login_token: string;
-
-  @IsBoolean()
   is_first_login: boolean;
-
-  @IsDate()
   mail_verified_at: Date;
-
-  @IsDate()
   created_at: Date;
-
-  @IsDate()
   updated_at: Date;
-
-  @IsDate()
   deleted_at: Date;
 
   constructor(data) {
