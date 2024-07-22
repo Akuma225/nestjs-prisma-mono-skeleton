@@ -58,4 +58,12 @@ export class ProductService extends BaseCRUDService<ProductEntity> {
   restore(id: string, connectedUserId?: string) {
     return this.genericRestore(id, connectedUserId, { category: true });
   }
+
+  async count(whereClause?: any): Promise<number> {
+    return this.genericCount(whereClause);
+  }
+
+  async groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any> {
+    return this.genericGroupBy(by, whereClause, orderBy, skip, take);
+  }
 }

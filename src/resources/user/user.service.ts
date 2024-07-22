@@ -33,6 +33,12 @@ export class UserService extends BaseCRUDService<UserEntity> {
     restore(id: string, connectedUserId?: string, include?: any, select?: any): Promise<UserEntity> {
         throw new Error('Method not implemented.');
     }
+    count(whereClause?: any): Promise<number> {
+        throw new Error('Method not implemented.');
+    }
+    groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any> {
+        throw new Error('Method not implemented.');
+    }
     
     constructor(
         @Inject('MODEL_MAPPING') modelName: string,

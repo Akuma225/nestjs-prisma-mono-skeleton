@@ -101,6 +101,45 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
+  async genericCreateMany(
+    data: any[],
+    connectedUserId?: string,
+    include: any = {},
+    select: any = {}
+  ): Promise<T[]> {
+    this.initServices();
+
+    const requestContext = BaseCRUDService.getRequestContextService();
+    const request: CustomRequest = requestContext.getContext();
+
+    if (!request.transaction) {
+      try {
+        return await this.model.createMany({
+          data: data.map(d => ({
+            ...d,
+            created_by: connectedUserId,
+          })),
+          include,
+          select: !include ? select : undefined,
+        });
+      } catch (error) {
+        this.handleError(error, 'Error creating records');
+      }
+    }
+
+    try {
+      const prisma = BaseCRUDService.getPrismaService();
+      const createdData = await prisma.createMany(this.modelName, data.map(d => ({
+        ...d,
+        created_by: connectedUserId,
+      })), include, select);
+
+      return createdData;
+    } catch (error) {
+      this.handleError(error, 'Error creating records');
+    }
+  }
+
   async genericFindAll(
     params?: IPaginationParams,
     whereClause: any = {},
@@ -304,6 +343,38 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
+  async genericCount(whereClause: any = {}): Promise<number> {
+    this.initServices();
+
+    try {
+      return await this.model.count({ where: whereClause });
+    } catch (error) {
+      this.handleError(error, 'Error counting records');
+    }
+  }
+
+  async genericGroupBy(
+    by: any,
+    whereClause: any = {},
+    orderBy: any = {},
+    skip: number = 0,
+    take: number = 10
+  ): Promise<any> {
+    this.initServices();
+
+    try {
+      return await this.model.groupBy({
+        by,
+        where: whereClause,
+        orderBy,
+        skip,
+        take,
+      });
+    } catch (error) {
+      this.handleError(error, 'Error grouping records');
+    }
+  }
+
   // Méthodes abstraites à implémenter par les classes dérivées
   abstract create(data: any, connectedUserId?: string, include?: any, select?: any): Promise<T>;
   abstract findAll(params?: IPaginationParams, whereClause?: any, include?: any, select?: any, orderBy?: any[]): Promise<PaginationVm>;
@@ -313,4 +384,6 @@ export abstract class BaseCRUDService<T> {
   abstract delete(id: string): Promise<T>;
   abstract softDelete(id: string, connectedUserId?: string, include?: any, select?: any): Promise<T>;
   abstract restore(id: string, connectedUserId?: string, include?: any, select?: any): Promise<T>;
+  abstract count(whereClause?: any): Promise<number>;
+  abstract groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any>;
 }

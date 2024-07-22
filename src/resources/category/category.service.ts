@@ -56,4 +56,12 @@ export class CategoryService extends BaseCRUDService<CategoryEntity> {
   restore(id: string, connectedUserId?: string) {
     return this.genericRestore(id, connectedUserId);
   }
+
+  async count(whereClause?: any): Promise<number> {
+    return this.genericCount(whereClause);
+  }
+
+  async groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any> {
+    return this.genericGroupBy(by, whereClause, orderBy, skip, take);
+  }
 }

@@ -78,6 +78,22 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
   }
 
+  async createMany(model: string, data: any[], include?: any, select?: any) {
+    try {
+      const createdData = await this[model].createMany({
+        data,
+        include,
+        select: !include ? select : undefined
+      });
+      this.transactionLog.push({ model, action: 'create', data: { where: { id: createdData.id } } });
+      Logger.log(`Created record in ${model}`, JSON.stringify(createdData));
+      return createdData;
+    } catch (error) {
+      Logger.error(`Error creating record in ${model}`, error.stack);
+      throw error;
+    }
+  }
+
   /**
    * Updates a record in the specified model.
    * 
@@ -125,6 +141,34 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       return deletedData;
     } catch (error) {
       Logger.error(`Error deleting record in ${model}`, error.stack);
+      throw error;
+    }
+  }
+
+  async count(model: string, where: any) {
+    try {
+      const count = await this[model].count({ where });
+      Logger.log(`Counted records in ${model}`, JSON.stringify(count));
+      return count;
+    } catch (error) {
+      Logger.error(`Error counting records in ${model}`, error.stack);
+      throw error;
+    }
+  }
+
+  async groupBy(model: string, by: any, where: any, orderBy: any, skip: number, take: number) {
+    try {
+      const groupedData = await this[model].groupBy({
+        by,
+        where,
+        orderBy,
+        skip,
+        take
+      });
+      Logger.log(`Grouped records in ${model}`, JSON.stringify(groupedData));
+      return groupedData;
+    } catch (error) {
+      Logger.error(`Error grouping records in ${model}`, error.stack);
       throw error;
     }
   }
