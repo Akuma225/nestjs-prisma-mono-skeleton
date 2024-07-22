@@ -45,6 +45,10 @@ export class AdminService extends BaseCRUDService<UserEntity> {
     return this.genericFindOne(id);
   }
 
+  findOneBy(whereClause: any, include?: any, select?: any): Promise<UserEntity> {
+    return this.genericFindOneBy(whereClause, include, select);
+  }
+
   async update(id: string, updateAdminDto: UpdateAdminDto, connectedUserId?: string) {
     const oAdmin = new UpdateAdminMapper({
       ...updateAdminDto,
@@ -68,7 +72,7 @@ export class AdminService extends BaseCRUDService<UserEntity> {
     return updatedAdmin;
   }
 
-  remove(id: string) {
+  delete(id: string) {
     return this.genericDelete(id);
   }
 
@@ -78,5 +82,13 @@ export class AdminService extends BaseCRUDService<UserEntity> {
 
   restore(id: string, connectedUserId?: string) {
     return this.genericRestore(id, connectedUserId);
+  }
+
+  async count(whereClause?: any): Promise<number> {
+    return this.genericCount(whereClause);
+  }
+
+  async groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any> {
+    return this.genericGroupBy(by, whereClause, orderBy, skip, take);
   }
 }

@@ -33,6 +33,10 @@ export class ProductService extends BaseCRUDService<ProductEntity> {
     return this.genericFindOne(id, { category: true });
   }
 
+  findOneBy(whereClause: any, include?: any, select?: any): Promise<ProductEntity> {
+    return this.genericFindOneBy(whereClause, include, select);
+  }
+
   update(id: string, updateProductDto: UpdateProductDto, connectedUserId: string) {
     let slug = updateProductDto.name ? this.slugService.slugify(updateProductDto.name) : undefined;
 
@@ -43,7 +47,7 @@ export class ProductService extends BaseCRUDService<ProductEntity> {
     }, connectedUserId, { category: true });
   }
 
-  remove(id: string) {
+  delete(id: string) {
     return this.genericDelete(id);
   }
 
@@ -53,5 +57,13 @@ export class ProductService extends BaseCRUDService<ProductEntity> {
 
   restore(id: string, connectedUserId?: string) {
     return this.genericRestore(id, connectedUserId, { category: true });
+  }
+
+  async count(whereClause?: any): Promise<number> {
+    return this.genericCount(whereClause);
+  }
+
+  async groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any> {
+    return this.genericGroupBy(by, whereClause, orderBy, skip, take);
   }
 }
