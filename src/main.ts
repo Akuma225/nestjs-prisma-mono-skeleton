@@ -66,6 +66,7 @@ async function bootstrap() {
     .setTitle(APP_NAME)
     .setDescription(BACK_OFFICE_DESCRIPTION)
     .setVersion(APP_VERSION)
+    .addBearerAuth()
     .build();
   const backOfficeDocument = SwaggerModule.createDocument(
     app,

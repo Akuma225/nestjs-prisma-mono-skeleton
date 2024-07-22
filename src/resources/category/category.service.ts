@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
+import { CategoryEntity } from './entities/category.entity';
 import { BaseCRUDService } from 'src/commons/services/base_crud.service';
 import { SlugService } from 'src/commons/services/slug.service';
 import { IPaginationParams } from 'src/commons/interfaces/pagination-params';
 
 @Injectable()
-export class CategoryService extends BaseCRUDService<Category> {
+export class CategoryService extends BaseCRUDService<CategoryEntity> {
   constructor(
     protected readonly slugService: SlugService,
     @Inject('MODEL_MAPPING') modelName: string,

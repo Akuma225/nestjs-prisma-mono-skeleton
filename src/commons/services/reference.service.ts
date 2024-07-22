@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import {
   ModelMappingPrefix,
   ModelMappingTable
@@ -24,12 +24,21 @@ export class ReferenceService {
     length: number = 10,
     referenceField: string = 'reference'
   ): Promise<string> {
+
+    if (!prefix) {
+      throw new HttpException('Préfixe non trouvé', 500);
+    }
+
     const reference = `${prefix}-${generateRandomString(length)}`;
 
-    const table = ModelMappingTable[prefix];
+    const property = Object.keys(ModelMappingPrefix).find(
+      (key) => ModelMappingPrefix[key] === prefix
+    );
+
+    const table = ModelMappingTable[property];
 
     if (!table) {
-      throw new HttpException('Table non trouvée', 500);
+      throw new HttpException('Table non trouvée pour le préfixe: ' + prefix, 500);
     }
 
     // Type assertion to inform TypeScript of the correct model type

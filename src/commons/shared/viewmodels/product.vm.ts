@@ -1,7 +1,6 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { BaseVm } from "./base.vm";
 import { CategoryVm } from "./category.vm";
-import { Product } from "src/resources/product/entities/product.entity";
 import { FilePath } from "src/commons/enums/file_path.enum";
 
 export class ProductVm extends BaseVm {
@@ -26,7 +25,7 @@ export class ProductVm extends BaseVm {
     @ApiResponseProperty()
     category: CategoryVm;
 
-    constructor(data: Product) {
+    constructor(data) {
         super(data);
         this.id = data.id;
         this.name = data.name;
