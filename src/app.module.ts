@@ -38,6 +38,7 @@ import { BootstrapService } from './commons/services/bootstrap.service';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Assure que le ConfigModule est global
+      envFilePath: '.env', // Fichier .env à charger
     }),
     ThrottlerModule.forRoot([
       {

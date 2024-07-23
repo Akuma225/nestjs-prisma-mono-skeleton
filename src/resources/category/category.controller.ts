@@ -14,6 +14,7 @@ import { AuthorizationGuard } from 'src/commons/guards/authorization.guard';
 import { SetProfile } from 'src/commons/decorators/set-profile.decorator';
 import { Profile } from 'src/commons/enums/profile.enum';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
+import { VerifyOwnership } from 'src/commons/decorators/verify-ownership.decorator';
 
 @ApiTags('Category')
 @ApiBearerAuth()
@@ -56,6 +57,11 @@ export class CategoryController {
   @Patch(':id')
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @VerifyOwnership({
+    table: ModelMappingTable.CATEGORY,
+    propertyPath: "created_by",
+    target: "params",
+  })
   @ApiResponse({ status: 200, type: CategoryVm })
   async update(
     @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" })
