@@ -38,3 +38,4 @@ lerna-debug.log*
 documentation
 
 prisma/dbml
+prisma/json-schema
