@@ -9,27 +9,31 @@ export class RedisService {
     constructor(
         private readonly configService: ConfigService
     ) {
+        const redisHost = this.configService.get<string>('REDIS_HOST') || 'localhost';
+        const redisPort = this.configService.get<number>('REDIS_PORT') || 6379;
+
+        // Check and log the values
+        console.log(`REDIS_HOST: ${redisHost}, REDIS_PORT: ${redisPort}`);
+
+        // Ensure values are strings
+        const redisUrl = `redis://${redisHost}:${redisPort}`;
+
+        console.log(`Connecting to Redis at ${redisUrl}`);
+
         this.client = createClient({
-            url: `redis://${this.configService.get<string>('REDIS_HOST')}:${this.configService.get<number>('REDIS_PORT')}`,
+            url: redisUrl,
+            // password: this.configService.get<string>('REDIS_PASSWORD'),
         });
-        this.client.connect();
+        
+        this.client.connect().catch(error => {
+            console.error('Error connecting to Redis:', error);
+        });
     }
 
-    /**
-     * Retrieves the value associated with the given key from Redis.
-     * @param key - The key to retrieve the value for.
-     * @returns A Promise that resolves to the value associated with the key.
-     */
     async get(key: string): Promise<string> {
         return this.client.get(key);
     }
 
-    /**
-     * Sets the value associated with the given key in Redis.
-     * @param key - The key to set the value for.
-     * @param value - The value to set.
-     * @param ttl - The time-to-live (in seconds) for the key-value pair.
-     */
     async set(key: string, value: string, ttl: number) {
         await this.client.set(key, value, {
             EX: ttl,
