@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from 'src/commons/services/prisma.service';
 import { CustomRequest } from '../interfaces/custom_request';
@@ -12,29 +12,32 @@ export class VerifyOwnershipGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    Logger.log('Vérification de l\'appartenance à la ressource');
+
     const request: CustomRequest = context.switchToHttp().getRequest<CustomRequest>();
     const user = request.user;
 
     // Vérifier le rôle de l'utilisateur
-    if ([Profile.ADMIN, Profile.SUPER_ADMIN].includes(user.profile)) {
+    /*if ([Profile.ADMIN, Profile.SUPER_ADMIN].includes(user.profile)) {
       return true; // Autoriser l'accès
-    }
+    }*/
 
     // Récupérer les métadonnées du décorateur
     const target = this.reflector.get<string>('verify-ownership-target', context.getHandler());
     const key = this.reflector.get<string>('verify-ownership-key', context.getHandler()) || 'id';
     const table = this.reflector.get<string>('verify-ownership-table', context.getHandler());
+    const tableProperty = this.reflector.get<string>('verify-ownership-tableProperty', context.getHandler());
     const propertyPath = this.reflector.get<string>('verify-ownership-propertyPath', context.getHandler());
 
     // Récupérer l'id de la ressource à partir des paramètres de la requête
     const resourceId = this.getResourceId(request, target, key);
+    Logger.log(resourceId);
 
-    // Vérifier la propriété
-    const isOwner = await this.checkOwnership(user.id, resourceId, table, propertyPath);
+    const data = await this.getDataFromDB(table, tableProperty, resourceId);
+    Logger.log(data);
 
-    if (!isOwner) {
-      throw new ForbiddenException('Vous n\'êtes pas autorisé à accéder à cette ressource');
-    }
+    // Vérifier l'appartenance à la ressource
+    await this.checkOwnership(data, propertyPath, user);
 
     return true;
   }
@@ -52,26 +55,27 @@ export class VerifyOwnershipGuard implements CanActivate {
     }
   }
 
-  private async checkOwnership(userId: string, resourceId: string, table: string, propertyPath: string): Promise<boolean> {
-    // Construire une requête dynamique avec Prisma
-    const resource = await this.prisma[table].findUnique({
+  private getDataFromDB(table: string, tableProperty: string, resourceId: string) {
+    return this.prisma[table].findUnique({
       where: {
-        [propertyPath]: resourceId,
+        [tableProperty]: resourceId,
       },
     });
-
-    return resource && this.isOwner(resource, userId, propertyPath);
   }
 
-  private isOwner(resource: any, userId: string, propertyPath: string): boolean {
-    const properties = propertyPath.split('.');
-    let currentValue = resource;
-
-    for (const prop of properties) {
-      if (!currentValue) return false;
-      currentValue = currentValue[prop];
+  private async checkOwnership(data: any, propertyPath: string, user: any) {
+    const propertyValue = this.getPropertyData(data, propertyPath);
+    Logger.log('PropertyValue')
+    Logger.log(propertyValue);
+    Logger.log('UserId')
+    Logger.log(user.id);
+    
+    if (propertyValue !== user.id) {
+      throw new HttpException('Vous n\'êtes pas autorisé à accéder à cette ressource', HttpStatus.FORBIDDEN);
     }
+  }
 
-    return currentValue === userId;
+  private getPropertyData(data, propertyPath: string) {
+    return propertyPath.split('.').reduce((acc, prop) => acc[prop], data);
   }
 }
