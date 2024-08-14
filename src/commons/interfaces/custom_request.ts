@@ -10,5 +10,6 @@ export interface CustomRequest extends Request {
   user: UserData
   extended_audit: boolean
   transaction?: boolean,
+  prismaTransaction?: any;
   savedFiles?: string[]
 }
