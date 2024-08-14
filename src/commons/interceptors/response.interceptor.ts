@@ -38,7 +38,7 @@ export class ResponseInterceptor implements NestInterceptor {
         }
 
         // Handle specific error message for file too large Multer error
-        if (error.stack.includes('PayloadTooLargeException: File too large')) {
+        if (error.stack?.includes('PayloadTooLargeException: File too large')) {
           message = `Le fichier est trop volumineux. La taille maximale autorisée est de ${process.env.MULTER_MAX_FILE_SIZE} Mo.`;
         }
 
