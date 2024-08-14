@@ -15,6 +15,8 @@ import { SetProfile } from 'src/commons/decorators/set-profile.decorator';
 import { Profile } from 'src/commons/enums/profile.enum';
 import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
 import { VerifyOwnership } from 'src/commons/decorators/verify-ownership.decorator';
+import { ParamEntity } from 'src/commons/decorators/param-entity.decorator';
+import { CategoryEntity } from './entities/category.entity';
 
 @ApiTags('Category')
 @ApiBearerAuth()
@@ -49,9 +51,10 @@ export class CategoryController {
   @ApiResponse({ status: 200, type: CategoryVm })
   @Cacheable()
   async findOne(
-    @ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string,
+    //@ParamId({ model: ModelMappingTable.CATEGORY, errorMessage: "La catégorie n'existe pas !" }) id: string,
+    @ParamEntity({ model: ModelMappingTable.CATEGORY, key: 'id', errorMessage: "La catégorie n'existe pas !" }) category: CategoryEntity
   ) {
-    return CategoryVm.create(await this.categoryService.findOne(id));
+    return CategoryVm.create(category);
   }
 
   @Patch(':id')

@@ -22,7 +22,7 @@ export class RedisService {
 
         this.client = createClient({
             url: redisUrl,
-            // password: this.configService.get<string>('REDIS_PASSWORD'),
+            password: this.configService.get<string>('REDIS_PASSWORD'),
         });
         
         this.client.connect().catch(error => {
