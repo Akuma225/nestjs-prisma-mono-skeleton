@@ -28,6 +28,7 @@ import { DeleteNonUsedFilesCron } from './commons/crons/delete-non-used-files.cr
 import { AdminModule } from './resources/admin/admin.module';
 import { UserModule } from './resources/user/user.module';
 import { BootstrapService } from './commons/services/bootstrap.service';
+import { AppEntityConstraint } from './commons/decorators/match-entity.decorator';
 
 /**
  * Module principal de l'application.
@@ -90,6 +91,7 @@ import { BootstrapService } from './commons/services/bootstrap.service';
     // Decorators personnalisés
     IsUniqueConstraint,
     IsDataExistsConstraint,
+    AppEntityConstraint,
     // CRONs
     DeleteNonUsedFilesCron,
   ],
@@ -109,6 +111,7 @@ import { BootstrapService } from './commons/services/bootstrap.service';
     StorageService,
     IsUniqueConstraint,
     IsDataExistsConstraint,
+    AppEntityConstraint,
     DeleteNonUsedFilesCron,
   ],
 })
