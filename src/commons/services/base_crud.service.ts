@@ -90,7 +90,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const createdData = await prisma.getClient().create(this.modelName, {
+      const createdData = await prisma.create(this.modelName, {
         ...data,
         created_by: connectedUserId,
       }, include, select);
@@ -101,7 +101,7 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
-  async genericCreateMany(
+  /*async genericCreateMany(
     data: any[],
     connectedUserId?: string,
     include: any = {},
@@ -129,7 +129,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const createdData = await prisma.getClient().createMany(this.modelName, data.map(d => ({
+      const createdData = await prisma.createMany(this.modelName, data.map(d => ({
         ...d,
         created_by: connectedUserId,
       })), include, select);
@@ -138,7 +138,7 @@ export abstract class BaseCRUDService<T> {
     } catch (error) {
       this.handleError(error, 'Error creating records');
     }
-  }
+  }*/
 
   async genericFindAll(
     params?: IPaginationParams,
@@ -231,7 +231,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.getClient().update(this.modelName, { id }, {
+      const updatedData = await prisma.update(this.modelName, { id }, {
         ...data,
         updated_by: connectedUserId,
       }, include, select);
@@ -260,7 +260,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const deletedData = await prisma.getClient().delete(this.modelName, { id });
+      const deletedData = await prisma.delete(this.modelName, { id });
 
       return deletedData;
     } catch (error) {
@@ -294,7 +294,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.getClient().update(this.modelName, { id }, {
+      const updatedData = await prisma.update(this.modelName, { id }, {
         deleted_at: new Date(),
         deleted_by: connectedUserId,
       }, include, select);
@@ -331,7 +331,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.getClient().update(this.modelName, { id }, {
+      const updatedData = await prisma.update(this.modelName, { id }, {
         deleted_at: null,
         deleted_by: null,
         updated_by: connectedUserId,

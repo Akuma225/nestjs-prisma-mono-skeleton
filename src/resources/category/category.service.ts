@@ -11,13 +11,26 @@ import { PrismaService } from 'src/commons/services/prisma.service';
 export class CategoryService extends BaseCRUDService<CategoryEntity> {
   constructor(
     protected readonly slugService: SlugService,
+    private readonly prismaService: PrismaService,
     @Inject('MODEL_MAPPING') modelName: string,
   ) {
     super(modelName);
   }
 
-  create(createCategoryDto: CreateCategoryDto, connectedUserId?: string) {
+  async create(createCategoryDto: CreateCategoryDto, connectedUserId?: string) {
     const slug = this.slugService.slugify(createCategoryDto.name);
+
+    await this.genericCreate({
+      name: "Generic Create 4",
+      slug: "generic_create_4"
+    })
+
+    await this.prismaService.categories.create({
+      data: {
+        name: "Normal Create 4",
+        slug: "d4d9e7de98e9d84e98sssssssss"
+      }
+    })
 
     return this.genericCreate({
       ...createCategoryDto,

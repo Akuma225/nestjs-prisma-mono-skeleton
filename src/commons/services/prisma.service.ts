@@ -19,18 +19,16 @@ export class PrismaService
 
   constructor() {
     super();
-
-    // Créer un proxy pour intercepter les appels de méthodes
     return new Proxy(this, {
-      get: (target, prop) => {
-        // Si la propriété demandée est une méthode de PrismaClient, on vérifie si on doit utiliser le client transactionnel ou non
-        if (typeof target[prop] === 'function' && prop in target) {
+      get: (target, prop: string) => {
+        if (typeof target[prop] !== 'undefined') {
           const client = target.getClient();
-          return client[prop].bind(client);
-        }
 
-        // Sinon, on retourne la propriété normalement
-        return target[prop];
+          return typeof client[prop] === 'function'
+            ? client[prop].bind(client)
+            : client[prop];
+        }
+        return undefined;
       },
     });
   }
@@ -43,18 +41,6 @@ export class PrismaService
     await this.$disconnect();
   }
 
-  getClient() {
-    const requestContext = PrismaService.getRequestContextService();
-    const request: CustomRequest = requestContext.getContext();
-
-    if (request.transaction && request.prismaTransaction) {
-      Logger.log('Using transaction client');
-      return request.prismaTransaction;
-    }
-
-    return this.transactionClient || this;
-  }
-
   private static getRequestContextService(): RequestContextService {
     if (!PrismaService.requestContextService) {
       PrismaService.requestContextService =
@@ -62,6 +48,30 @@ export class PrismaService
     }
     return PrismaService.requestContextService;
   }
+
+  getClient(): PrismaClient {
+    const requestContextService = PrismaService.getRequestContextService();
+  
+    if (!requestContextService) {
+      Logger.warn('RequestContextService is not initialized.');
+      return this.transactionClient || this;
+    }
+  
+    const request: CustomRequest = requestContextService.getContext();
+  
+    if (!request) {
+      Logger.warn('RequestContext is not available.');
+      return this.transactionClient || this;
+    }
+  
+    if (request.transaction && request.prismaTransaction) {
+      Logger.log('Using transaction client');
+      return request.prismaTransaction;
+    }
+  
+    return this.transactionClient || this;
+  }
+  
 
   async create(model: string, data: any, include?: any, select?: any) {
     try {

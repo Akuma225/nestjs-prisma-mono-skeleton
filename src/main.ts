@@ -6,7 +6,7 @@ import { join } from 'path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 import { LifecycleService } from './commons/lifecycles/LifecycleService';
-import { PrismaClientExceptionFilter } from './commons/filters/prisma-client-exception/prisma-client-exception.filter';
+//import { PrismaClientExceptionFilter } from './commons/filters/prisma-client-exception/prisma-client-exception.filter';
 import { useContainer } from 'class-validator';
 
 /**
@@ -41,7 +41,7 @@ async function bootstrap() {
   });
 
   // Configure le filtre global pour les exceptions PrismaClient
-  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+  //app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
   // Utilise le conteneur de NestJS pour class-validator
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
