@@ -5,18 +5,32 @@ import { CategoryEntity } from './entities/category.entity';
 import { BaseCRUDService } from 'src/commons/services/base_crud.service';
 import { SlugService } from 'src/commons/services/slug.service';
 import { IPaginationParams } from 'src/commons/interfaces/pagination-params';
+import { PrismaService } from 'src/commons/services/prisma.service';
 
 @Injectable()
 export class CategoryService extends BaseCRUDService<CategoryEntity> {
   constructor(
     protected readonly slugService: SlugService,
+    private readonly prismaService: PrismaService,
     @Inject('MODEL_MAPPING') modelName: string,
   ) {
     super(modelName);
   }
 
-  create(createCategoryDto: CreateCategoryDto, connectedUserId?: string) {
+  async create(createCategoryDto: CreateCategoryDto, connectedUserId?: string) {
     const slug = this.slugService.slugify(createCategoryDto.name);
+
+    await this.genericCreate({
+      name: "Generic Create 4",
+      slug: "generic_create_4"
+    })
+
+    await this.prismaService.categories.create({
+      data: {
+        name: "Normal Create 4",
+        slug: "d4d9e7de98e9d84e98sssssssss"
+      }
+    })
 
     return this.genericCreate({
       ...createCategoryDto,

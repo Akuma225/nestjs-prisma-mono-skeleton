@@ -17,24 +17,28 @@ export class PrismaService
   private transactionClient: PrismaClient | null = null;
   protected static requestContextService: RequestContextService;
 
+  constructor() {
+    super();
+    return new Proxy(this, {
+      get: (target, prop: string) => {
+        if (typeof target[prop] !== 'undefined') {
+          const client = target.getClient();
+
+          return typeof client[prop] === 'function'
+            ? client[prop].bind(client)
+            : client[prop];
+        }
+        return undefined;
+      },
+    });
+  }
+
   async onModuleInit() {
     await this.$connect();
   }
 
   async onModuleDestroy() {
     await this.$disconnect();
-  }
-
-  getClient() {
-    const requestContext = PrismaService.getRequestContextService();
-    const request: CustomRequest = requestContext.getContext();
-
-    if (request.transaction && request.prismaTransaction) {
-      Logger.log('Using transaction client');
-      return request.prismaTransaction;
-    }
-
-    return this.transactionClient || this;
   }
 
   private static getRequestContextService(): RequestContextService {
@@ -44,6 +48,30 @@ export class PrismaService
     }
     return PrismaService.requestContextService;
   }
+
+  getClient(): PrismaClient {
+    const requestContextService = PrismaService.getRequestContextService();
+  
+    if (!requestContextService) {
+      Logger.warn('RequestContextService is not initialized.');
+      return this.transactionClient || this;
+    }
+  
+    const request: CustomRequest = requestContextService.getContext();
+  
+    if (!request) {
+      Logger.warn('RequestContext is not available.');
+      return this.transactionClient || this;
+    }
+  
+    if (request.transaction && request.prismaTransaction) {
+      Logger.log('Using transaction client');
+      return request.prismaTransaction;
+    }
+  
+    return this.transactionClient || this;
+  }
+  
 
   async create(model: string, data: any, include?: any, select?: any) {
     try {

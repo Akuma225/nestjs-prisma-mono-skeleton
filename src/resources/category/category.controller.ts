@@ -17,6 +17,7 @@ import { AuthenticationGuard } from 'src/commons/guards/authentication.guard';
 import { VerifyOwnership } from 'src/commons/decorators/verify-ownership.decorator';
 import { ParamEntity } from 'src/commons/decorators/param-entity.decorator';
 import { CategoryEntity } from './entities/category.entity';
+import { Transaction } from 'src/commons/decorators/transaction.decorator';
 
 @ApiTags('Category')
 @ApiBearerAuth()
@@ -25,6 +26,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) { }
 
   @Post()
+  @Transaction()
   @SetProfile(Profile.ADMIN, Profile.SUPER_ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @ApiResponse({ status: 201, type: CategoryVm })

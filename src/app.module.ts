@@ -146,9 +146,9 @@ export class AppModule implements OnModuleInit {
    */
   onModuleInit(): void {
     ViewmodelServiceProvider.setService(this.viewmodelService);
-    PrismaServiceProvider.setService(this.prismaService);
     PaginationServiceProvider.setService(this.paginationService);
     RedisServiceProvider.setService(this.redisService);
     RequestContextServiceProvider.setService(this.requestContextService);
+    PrismaServiceProvider.setService(this.prismaService);
   }
 }
