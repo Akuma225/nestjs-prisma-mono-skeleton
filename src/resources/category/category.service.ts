@@ -5,6 +5,7 @@ import { CategoryEntity } from './entities/category.entity';
 import { BaseCRUDService } from 'src/commons/services/base_crud.service';
 import { SlugService } from 'src/commons/services/slug.service';
 import { IPaginationParams } from 'src/commons/interfaces/pagination-params';
+import { PrismaService } from 'src/commons/services/prisma.service';
 
 @Injectable()
 export class CategoryService extends BaseCRUDService<CategoryEntity> {

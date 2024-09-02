@@ -17,6 +17,24 @@ export class PrismaService
   private transactionClient: PrismaClient | null = null;
   protected static requestContextService: RequestContextService;
 
+  constructor() {
+    super();
+
+    // Créer un proxy pour intercepter les appels de méthodes
+    return new Proxy(this, {
+      get: (target, prop) => {
+        // Si la propriété demandée est une méthode de PrismaClient, on vérifie si on doit utiliser le client transactionnel ou non
+        if (typeof target[prop] === 'function' && prop in target) {
+          const client = target.getClient();
+          return client[prop].bind(client);
+        }
+
+        // Sinon, on retourne la propriété normalement
+        return target[prop];
+      },
+    });
+  }
+
   async onModuleInit() {
     await this.$connect();
   }
