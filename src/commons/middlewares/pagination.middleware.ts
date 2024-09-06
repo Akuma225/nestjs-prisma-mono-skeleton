@@ -18,7 +18,9 @@ export class PaginationMiddleware implements NestMiddleware {
       const search = req.query.search as string
       const is_deleted_too = req.query.is_deleted_too === 'true'
       const is_deleted_only = req.query.is_deleted_only === 'true'
+      const load_previous_pages = req.query.load_previous_pages === 'true'
       const order = req.query.order as string
+      const specific_pages = req.query.specific_pages as unknown as number[]
 
       req.pagination = {
         page,
@@ -28,6 +30,8 @@ export class PaginationMiddleware implements NestMiddleware {
         is_deleted_too,
         is_deleted_only,
         order,
+        load_previous_pages,
+        specific_pages
       }
     }
 

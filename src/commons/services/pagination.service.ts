@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { PaginationVm } from '../shared/viewmodels/pagination.vm'
 import { PrismaService } from './prisma.service'
 import { IPaginationParams } from '../interfaces/pagination-params'
+import { PaginateOptions } from '../interfaces/services/pagination/paginate-options'
 
 @Injectable()
 export class PaginationService {
@@ -17,15 +18,9 @@ export class PaginationService {
    * @param params - The pagination parameters.
    * @returns A Promise that resolves to a PaginationVm object containing the paginated data.
    */
-  async paginate(
-    model: string,
-    where: any,
-    include: any,
-    orderBy: any[],
-    select: any,
-    params: IPaginationParams,
-    searchables?: string[]
-  ): Promise<PaginationVm> {
+  async paginate(options: PaginateOptions): Promise<PaginationVm> {
+    let { params, where, include, searchables, select, orderBy, model } = options
+
     const DEFAULT_LIMIT = 10
     const DEFAULT_PAGE = 1
 

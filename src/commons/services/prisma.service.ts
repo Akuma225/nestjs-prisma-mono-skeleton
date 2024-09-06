@@ -8,6 +8,9 @@ import { PrismaClient } from '@prisma/client';
 import { RequestContextService } from './request-context.service';
 import { RequestContextServiceProvider } from '../providers/request-context-service.provider';
 import { CustomRequest } from '../interfaces/custom_request';
+import { CreateOptions } from '../interfaces/services/prisma/create-options';
+import { UpdateOptions } from '../interfaces/services/prisma/update-options';
+import { DeleteOptions } from '../interfaces/services/prisma/delete-options';
 
 @Injectable()
 export class PrismaService
@@ -73,7 +76,9 @@ export class PrismaService
   }
   
 
-  async create(model: string, data: any, include?: any, select?: any) {
+  async create(options: CreateOptions) {
+    const { model, data, include, select } = options;
+
     try {
       const createdData = await this.getClient()[model].create({
         data,
@@ -88,13 +93,9 @@ export class PrismaService
     }
   }
 
-  async update(
-    model: string,
-    where: any,
-    data: any,
-    include?: any,
-    select?: any,
-  ) {
+  async update(options: UpdateOptions) {
+    const { model, where, data, include, select } = options;
+
     try {
       const previousData = await this.getClient()[model].findUnique({ where });
       if (!previousData) {
@@ -114,7 +115,9 @@ export class PrismaService
     }
   }
 
-  async delete(model: string, where: any) {
+  async delete(options: DeleteOptions) {
+    const { model, where } = options;
+    
     try {
       const deletedData = await this.getClient()[model].delete({ where });
       Logger.log(`Deleted record in ${model}`, JSON.stringify(deletedData));

@@ -90,10 +90,15 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const createdData = await prisma.create(this.modelName, {
-        ...data,
-        created_by: connectedUserId,
-      }, include, select);
+      const createdData = await prisma.create({
+        model: this.modelName,
+        data: {
+          ...data,
+          created_by: connectedUserId,
+        },
+        include,
+        select
+      });
 
       return createdData;
     } catch (error) {
@@ -145,21 +150,22 @@ export abstract class BaseCRUDService<T> {
     whereClause: any = {},
     include: any = {},
     select: any = {},
-    orderBy: any[] = []
+    orderBy: any[] = [],
+    searchables: string[] = []
   ): Promise<PaginationVm> {
     this.initServices();
 
     try {
       whereClause.deleted_at = null;
-      return this.pagination.paginate(
-        this.modelName,
-        whereClause,
+      return this.pagination.paginate({
+        model: this.modelName,
+        where: whereClause,
         include,
         orderBy,
         select,
         params,
-        ['name', 'description']
-      );
+        searchables
+      });
     } catch (error) {
       this.handleError(error, 'Error fetching records');
     }
@@ -231,10 +237,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.update(this.modelName, { id }, {
-        ...data,
-        updated_by: connectedUserId,
-      }, include, select);
+      const updatedData = await prisma.update({ model: this.modelName, where: { id }, data: { ...data, updated_by: connectedUserId }, include, select });
 
       return updatedData;
     } catch (error) {
@@ -260,7 +263,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const deletedData = await prisma.delete(this.modelName, { id });
+      const deletedData = await prisma.delete({ model: this.modelName, where: { id } });
 
       return deletedData;
     } catch (error) {
@@ -294,10 +297,13 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.update(this.modelName, { id }, {
-        deleted_at: new Date(),
-        deleted_by: connectedUserId,
-      }, include, select);
+      const updatedData = await prisma.update({
+        model: this.modelName,
+        where: { id },
+        data: { deleted_at: new Date(), deleted_by: connectedUserId },
+        include,
+        select
+      });
 
       return updatedData;
     } catch (error) {
@@ -331,11 +337,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.update(this.modelName, { id }, {
-        deleted_at: null,
-        deleted_by: null,
-        updated_by: connectedUserId,
-      }, include, select);
+      const updatedData = await prisma.update({ model: this.modelName, where: { id }, data: { deleted_at: null, deleted_by: null, updated_by: connectedUserId }, include, select });
 
       return updatedData;
     } catch (error) {
