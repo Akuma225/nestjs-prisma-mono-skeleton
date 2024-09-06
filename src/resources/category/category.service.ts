@@ -20,43 +20,38 @@ export class CategoryService extends BaseCRUDService<CategoryEntity> {
   async create(createCategoryDto: CreateCategoryDto, connectedUserId?: string) {
     const slug = this.slugService.slugify(createCategoryDto.name);
 
-    await this.genericCreate({
-      name: "Generic Create 4",
-      slug: "generic_create_4"
-    })
-
-    await this.prismaService.categories.create({
-      data: {
-        name: "Normal Create 4",
-        slug: "d4d9e7de98e9d84e98sssssssss"
-      }
-    })
-
     return this.genericCreate({
-      ...createCategoryDto,
-      slug
-    }, connectedUserId);
+      data: {
+        ...createCategoryDto,
+        slug
+      },
+      connectedUserId
+    });
   }
 
   findAll(params?: IPaginationParams | undefined) {
-    return this.genericFindAll(params);
+    return this.genericFindAll({ params });
   }
 
   findOne(id: string) {
-    return this.genericFindOne(id);
+    return this.genericFindOne({ id });
   }
 
   findOneBy(whereClause: any, include?: any, select?: any): Promise<CategoryEntity> {
-    return this.genericFindOneBy(whereClause, include, select);
+    return this.genericFindOneBy({ whereClause, include, select });
   }
 
   update(id: string, updateCategoryDto: UpdateCategoryDto, connectedUserId?: string) {
     let slug = updateCategoryDto.name ? this.slugService.slugify(updateCategoryDto.name) : undefined;
 
-    return this.genericUpdate(id, {
-      ...updateCategoryDto,
-      slug
-    }, connectedUserId);
+    return this.genericUpdate({
+      id,
+      data: {
+        ...updateCategoryDto,
+        slug
+      },
+      connectedUserId
+    });
   }
 
   delete(id: string) {
@@ -64,11 +59,11 @@ export class CategoryService extends BaseCRUDService<CategoryEntity> {
   }
 
   softDelete(id: string, connectedUserId?: string) {
-    return this.genericSoftDelete(id, connectedUserId);
+    return this.genericSoftDelete({id, connectedUserId});
   }
 
   restore(id: string, connectedUserId?: string) {
-    return this.genericRestore(id, connectedUserId);
+    return this.genericRestore({id, connectedUserId});
   }
 
   async count(whereClause?: any): Promise<number> {
@@ -76,6 +71,6 @@ export class CategoryService extends BaseCRUDService<CategoryEntity> {
   }
 
   async groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any> {
-    return this.genericGroupBy(by, whereClause, orderBy, skip, take);
+    return this.genericGroupBy({by, whereClause, orderBy, skip, take});
   }
 }

@@ -50,7 +50,7 @@ export class UserService extends BaseCRUDService<UserEntity> {
         let password = undefined;
 
         if (updateUserDto.current_password && updateUserDto.new_password) {
-            const user = await this.genericFindOne(id);
+            const user = await this.genericFindOne({id});
             // Check if the current password is correct
             const isPasswordMatch = await bcrypt.compare(updateUserDto.current_password, user.password);
 
@@ -66,11 +66,11 @@ export class UserService extends BaseCRUDService<UserEntity> {
             password
         });
 
-        return this.genericUpdate(id, oUser, connectedUserId);
+        return this.genericUpdate({id, data: oUser, connectedUserId});
     }
 
     getProfile(id: string) {
-        return this.genericFindOne(id);
+        return this.genericFindOne({id});
     }
 
 }

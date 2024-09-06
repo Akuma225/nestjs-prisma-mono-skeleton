@@ -26,7 +26,10 @@ export class AdminService extends BaseCRUDService<UserEntity> {
       password: await bcrypt.hash(createAdminDto.password, 10),
     });
 
-    const createdUser = await this.genericCreate(oAdmin, connectedUserId);
+    const createdUser = await this.genericCreate({
+      data: oAdmin,
+      connectedUserId
+    });
 
     // Send email with password to the user
 
@@ -34,19 +37,22 @@ export class AdminService extends BaseCRUDService<UserEntity> {
   }
 
   findAll(params?: IPaginationParams | undefined) {
-    return this.genericFindAll(params, {
-      profile: {
-        in: [Profile.ADMIN, Profile.SUPER_ADMIN]
+    return this.genericFindAll({
+      params, 
+      whereClause: {
+        profile: {
+          in: [Profile.ADMIN, Profile.SUPER_ADMIN]
+        }
       }
     });
   }
 
   findOne(id: string) {
-    return this.genericFindOne(id);
+    return this.genericFindOne({ id });
   }
 
   findOneBy(whereClause: any, include?: any, select?: any): Promise<UserEntity> {
-    return this.genericFindOneBy(whereClause, include, select);
+    return this.genericFindOneBy({whereClause, include, select});
   }
 
   async update(id: string, updateAdminDto: UpdateAdminDto, connectedUserId?: string) {
@@ -56,7 +62,7 @@ export class AdminService extends BaseCRUDService<UserEntity> {
       is_first_login: updateAdminDto.password ? true : undefined
     });
 
-    const updatedAdmin = await this.genericUpdate(id, oAdmin, connectedUserId);
+    const updatedAdmin = await this.genericUpdate({id, data: oAdmin, connectedUserId});
 
     // Send email with password to the user if password has been updated
     if (updateAdminDto.password) {
@@ -77,11 +83,11 @@ export class AdminService extends BaseCRUDService<UserEntity> {
   }
 
   softDelete(id: string, connectedUserId?: string) {
-    return this.genericSoftDelete(id, connectedUserId);
+    return this.genericSoftDelete({id, connectedUserId});
   }
 
   restore(id: string, connectedUserId?: string) {
-    return this.genericRestore(id, connectedUserId);
+    return this.genericRestore({id, connectedUserId});
   }
 
   async count(whereClause?: any): Promise<number> {
@@ -89,6 +95,6 @@ export class AdminService extends BaseCRUDService<UserEntity> {
   }
 
   async groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any> {
-    return this.genericGroupBy(by, whereClause, orderBy, skip, take);
+    return this.genericGroupBy({by, whereClause, orderBy, skip, take});
   }
 }
