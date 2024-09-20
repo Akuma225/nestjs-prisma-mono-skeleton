@@ -39,4 +39,15 @@ export class RedisService {
             EX: ttl,
         });
     }
+
+    async del(key: string): Promise<void> {
+        await this.client.del(key);
+    }
+
+    async delByPattern(pattern: string): Promise<void> {
+        const keys = await this.client.keys(pattern);
+        if (keys.length > 0) {
+            await this.client.del(keys);
+        }
+    }
 }

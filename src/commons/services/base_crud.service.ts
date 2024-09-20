@@ -150,6 +150,7 @@ export abstract class BaseCRUDService<T> {
 
   async genericFindAll(options: GenericFindAllOptions): Promise<PaginationVm> {
     let { whereClause, include, select, searchables, orderBy, params } = options
+    whereClause = whereClause || {}
     this.initServices();
 
     try {

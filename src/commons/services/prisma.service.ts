@@ -67,14 +67,13 @@ export class PrismaService
       return this.transactionClient || this;
     }
   
-    if (request.transaction && request.prismaTransaction) {
+    if (request.transaction && request.prismaTransaction && request.prismaTransaction.$connect) {
       Logger.log('Using transaction client');
       return request.prismaTransaction;
     }
   
     return this.transactionClient || this;
-  }
-  
+  } 
 
   async create(options: CreateOptions) {
     const { model, data, include, select } = options;
