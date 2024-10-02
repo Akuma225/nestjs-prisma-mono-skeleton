@@ -8,6 +8,13 @@ import { PaginationServiceProvider } from '../providers/pagination-service.provi
 import { RequestContextService } from './request-context.service';
 import { RequestContextServiceProvider } from '../providers/request-context-service.provider';
 import { CustomRequest } from '../interfaces/custom_request';
+import { GenericCreateOptions } from '../interfaces/services/base-crud/generic-create-options';
+import { GenericFindAllOptions } from '../interfaces/services/base-crud/generic-find-all-options';
+import { GenericFindOneOptions } from '../interfaces/services/base-crud/generic-find-one-options';
+import { GenericFindOneByOptions } from '../interfaces/services/base-crud/generic-find-one-by-options';
+import { GenericUpdateOptions } from '../interfaces/services/base-crud/generic-update-options';
+import { GenericDefaultOptions } from '../interfaces/services/base-crud/generic-default-options';
+import { GenericGroupByOptions } from '../interfaces/services/base-crud/generic-group-by-options';
 
 /**
  * Base CRUD Service class for performing CRUD operations on a model.
@@ -62,12 +69,8 @@ export abstract class BaseCRUDService<T> {
     throw new HttpException(message, HttpStatus.BAD_REQUEST);
   }
 
-  async genericCreate(
-    data: any,
-    connectedUserId?: string,
-    include: any = {},
-    select: any = {}
-  ): Promise<T> {
+  async genericCreate(options: GenericCreateOptions): Promise<T> {
+    const { data, include, select, connectedUserId } = options
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -90,10 +93,15 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const createdData = await prisma.getClient().create(this.modelName, {
-        ...data,
-        created_by: connectedUserId,
-      }, include, select);
+      const createdData = await prisma.create({
+        model: this.modelName,
+        data: {
+          ...data,
+          created_by: connectedUserId,
+        },
+        include,
+        select
+      });
 
       return createdData;
     } catch (error) {
@@ -101,7 +109,7 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
-  async genericCreateMany(
+  /*async genericCreateMany(
     data: any[],
     connectedUserId?: string,
     include: any = {},
@@ -129,7 +137,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const createdData = await prisma.getClient().createMany(this.modelName, data.map(d => ({
+      const createdData = await prisma.createMany(this.modelName, data.map(d => ({
         ...d,
         created_by: connectedUserId,
       })), include, select);
@@ -138,38 +146,31 @@ export abstract class BaseCRUDService<T> {
     } catch (error) {
       this.handleError(error, 'Error creating records');
     }
-  }
+  }*/
 
-  async genericFindAll(
-    params?: IPaginationParams,
-    whereClause: any = {},
-    include: any = {},
-    select: any = {},
-    orderBy: any[] = []
-  ): Promise<PaginationVm> {
+  async genericFindAll(options: GenericFindAllOptions): Promise<PaginationVm> {
+    let { whereClause, include, select, searchables, orderBy, params } = options
+    whereClause = whereClause || {}
     this.initServices();
 
     try {
       whereClause.deleted_at = null;
-      return this.pagination.paginate(
-        this.modelName,
-        whereClause,
+      return this.pagination.paginate({
+        model: this.modelName,
+        where: whereClause,
         include,
         orderBy,
         select,
         params,
-        ['name', 'description']
-      );
+        searchables
+      });
     } catch (error) {
       this.handleError(error, 'Error fetching records');
     }
   }
 
-  async genericFindOne(
-    id: string,
-    include: any = {},
-    select: any = {}
-  ): Promise<T> {
+  async genericFindOne(options: GenericFindOneOptions): Promise<T> {
+    let { id, include, select } = options
     this.initServices();
 
     try {
@@ -183,11 +184,9 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
-  async genericFindOneBy(
-    whereClause: any,
-    include: any = {},
-    select: any = {}
-  ): Promise<T> {
+  async genericFindOneBy(options: GenericFindOneByOptions): Promise<T> {
+    let { whereClause, include, select } = options
+
     this.initServices();
 
     try {
@@ -201,13 +200,9 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
-  async genericUpdate(
-    id: string,
-    data: Partial<any>,
-    connectedUserId?: string,
-    include: any = {},
-    select: any = {}
-  ): Promise<T> {
+  async genericUpdate(options: GenericUpdateOptions): Promise<T> {
+    let { id, data, include, select, connectedUserId } = options
+
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -231,10 +226,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.getClient().update(this.modelName, { id }, {
-        ...data,
-        updated_by: connectedUserId,
-      }, include, select);
+      const updatedData = await prisma.update({ model: this.modelName, where: { id }, data: { ...data, updated_by: connectedUserId }, include, select });
 
       return updatedData;
     } catch (error) {
@@ -260,7 +252,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const deletedData = await prisma.getClient().delete(this.modelName, { id });
+      const deletedData = await prisma.delete({ model: this.modelName, where: { id } });
 
       return deletedData;
     } catch (error) {
@@ -268,12 +260,8 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
-  async genericSoftDelete(
-    id: string,
-    connectedUserId?: string,
-    include: any = {},
-    select: any = {}
-  ): Promise<T> {
+  async genericSoftDelete(options: GenericDefaultOptions): Promise<T> {
+    let { id, connectedUserId, include, select } = options
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -294,10 +282,13 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.getClient().update(this.modelName, { id }, {
-        deleted_at: new Date(),
-        deleted_by: connectedUserId,
-      }, include, select);
+      const updatedData = await prisma.update({
+        model: this.modelName,
+        where: { id },
+        data: { deleted_at: new Date(), deleted_by: connectedUserId },
+        include,
+        select
+      });
 
       return updatedData;
     } catch (error) {
@@ -305,12 +296,8 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
-  async genericRestore(
-    id: string,
-    connectedUserId?: string,
-    include: any = {},
-    select: any = {}
-  ): Promise<T> {
+  async genericRestore(options: GenericDefaultOptions): Promise<T> {
+    let { id, connectedUserId, include, select } = options
     this.initServices();
 
     const requestContext = BaseCRUDService.getRequestContextService();
@@ -331,11 +318,7 @@ export abstract class BaseCRUDService<T> {
 
     try {
       const prisma = BaseCRUDService.getPrismaService();
-      const updatedData = await prisma.getClient().update(this.modelName, { id }, {
-        deleted_at: null,
-        deleted_by: null,
-        updated_by: connectedUserId,
-      }, include, select);
+      const updatedData = await prisma.update({ model: this.modelName, where: { id }, data: { deleted_at: null, deleted_by: null, updated_by: connectedUserId }, include, select });
 
       return updatedData;
     } catch (error) {
@@ -353,13 +336,12 @@ export abstract class BaseCRUDService<T> {
     }
   }
 
-  async genericGroupBy(
-    by: any,
-    whereClause: any = {},
-    orderBy: any = {},
-    skip: number = 0,
-    take: number = 10
-  ): Promise<any> {
+  async genericGroupBy(options: GenericGroupByOptions): Promise<any> {
+    let { by, whereClause, orderBy, skip, take } = options
+
+    skip = skip || 0
+    take = take || 10
+
     this.initServices();
 
     try {
@@ -376,14 +358,11 @@ export abstract class BaseCRUDService<T> {
   }
 
   // Méthodes abstraites à implémenter par les classes dérivées
-  abstract create(data: any, connectedUserId?: string, include?: any, select?: any): Promise<T>;
-  abstract findAll(params?: IPaginationParams, whereClause?: any, include?: any, select?: any, orderBy?: any[]): Promise<PaginationVm>;
-  abstract findOne(id: string, include?: any, select?: any): Promise<T>;
-  abstract findOneBy(whereClause: any, include?: any, select?: any): Promise<T>;
-  abstract update(id: string, data: Partial<any>, connectedUserId?: string, include?: any, select?: any): Promise<T>;
+  abstract create(data: any, connectedUserId?: string): Promise<T>;
+  abstract findAll(params?: IPaginationParams, whereClause?: any): Promise<PaginationVm>;
+  abstract findOne(id: string): Promise<T>;
+  abstract update(id: string, data: Partial<any>, connectedUserId?: string): Promise<T>;
   abstract delete(id: string): Promise<T>;
-  abstract softDelete(id: string, connectedUserId?: string, include?: any, select?: any): Promise<T>;
-  abstract restore(id: string, connectedUserId?: string, include?: any, select?: any): Promise<T>;
-  abstract count(whereClause?: any): Promise<number>;
-  abstract groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any>;
+  abstract softDelete(id: string, connectedUserId?: string): Promise<T>;
+  abstract restore(id: string, connectedUserId?: string): Promise<T>;
 }

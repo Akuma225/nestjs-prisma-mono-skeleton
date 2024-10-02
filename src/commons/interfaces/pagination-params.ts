@@ -36,4 +36,14 @@ export interface IPaginationParams {
    * The order in which to sort the items.
    */
   order?: string;
+
+  /**
+   * Load the previous pages.
+   */
+  load_previous_pages?: boolean;
+
+  /**
+   * Specific pages to load
+   */
+  specific_pages?: number[];
 }

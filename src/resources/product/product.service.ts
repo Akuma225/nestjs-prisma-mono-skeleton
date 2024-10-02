@@ -19,32 +19,46 @@ export class ProductService extends BaseCRUDService<ProductEntity> {
     const slug = this.slugService.slugify(createProductDto.name);
 
     return this.genericCreate({
-      ...createProductDto,
-      slug,
-      image: createProductDto.image?.filename
-    }, connectedUserId, { category: true });
+      data: {
+        ...createProductDto,
+        slug,
+        image: createProductDto.image?.filename
+      },
+      connectedUserId,
+      include: { category: true }
+    });
   }
 
   findAll(params?: IPaginationParams | undefined) {
-    return this.genericFindAll(params, {}, { category: true });
+    return this.genericFindAll({
+      params,
+      include: {
+        category: true
+      }
+    });
   }
 
   findOne(id: string) {
-    return this.genericFindOne(id, { category: true });
+    return this.genericFindOne({ id, include: { category: true } });
   }
 
   findOneBy(whereClause: any, include?: any, select?: any): Promise<ProductEntity> {
-    return this.genericFindOneBy(whereClause, include, select);
+    return this.genericFindOneBy({ whereClause, include, select });
   }
 
   update(id: string, updateProductDto: UpdateProductDto, connectedUserId: string) {
     let slug = updateProductDto.name ? this.slugService.slugify(updateProductDto.name) : undefined;
 
-    return this.genericUpdate(id, {
-      ...updateProductDto,
-      slug,
-      image: updateProductDto.image ? updateProductDto.image.filename : undefined
-    }, connectedUserId, { category: true });
+    return this.genericUpdate({
+      id,
+      data: {
+        ...updateProductDto,
+        slug,
+        image: updateProductDto.image ? updateProductDto.image.filename : undefined
+      },
+      connectedUserId,
+      include: { category: true }
+    });
   }
 
   delete(id: string) {
@@ -52,11 +66,11 @@ export class ProductService extends BaseCRUDService<ProductEntity> {
   }
 
   softDelete(id: string, connectedUserId?: string) {
-    return this.genericSoftDelete(id, connectedUserId, { category: true });
+    return this.genericSoftDelete({id, connectedUserId, include: { category: true }});
   }
 
   restore(id: string, connectedUserId?: string) {
-    return this.genericRestore(id, connectedUserId, { category: true });
+    return this.genericRestore({id, connectedUserId, include: { category: true }});
   }
 
   async count(whereClause?: any): Promise<number> {
@@ -64,6 +78,6 @@ export class ProductService extends BaseCRUDService<ProductEntity> {
   }
 
   async groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any> {
-    return this.genericGroupBy(by, whereClause, orderBy, skip, take);
+    return this.genericGroupBy({by, whereClause, orderBy, skip, take});
   }
 }
