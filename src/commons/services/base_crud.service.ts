@@ -150,6 +150,7 @@ export abstract class BaseCRUDService<T> {
 
   async genericFindAll(options: GenericFindAllOptions): Promise<PaginationVm> {
     let { whereClause, include, select, searchables, orderBy, params } = options
+    whereClause = whereClause || {}
     this.initServices();
 
     try {
@@ -357,14 +358,11 @@ export abstract class BaseCRUDService<T> {
   }
 
   // Méthodes abstraites à implémenter par les classes dérivées
-  abstract create(data: any, connectedUserId?: string, include?: any, select?: any): Promise<T>;
-  abstract findAll(params?: IPaginationParams, whereClause?: any, include?: any, select?: any, orderBy?: any[]): Promise<PaginationVm>;
-  abstract findOne(id: string, entity?: T, include?: any, select?: any): Promise<T>;
-  abstract findOneBy(whereClause: any, include?: any, select?: any): Promise<T>;
-  abstract update(id: string, data: Partial<any>, connectedUserId?: string, entity?: T, include?: any, select?: any): Promise<T>;
-  abstract delete(id: string, entity?: T): Promise<T>;
-  abstract softDelete(id: string, connectedUserId?: string, entity?: T, include?: any, select?: any): Promise<T>;
-  abstract restore(id: string, connectedUserId?: string, entity?: T, include?: any, select?: any): Promise<T>;
-  abstract count(whereClause?: any): Promise<number>;
-  abstract groupBy(by: any, whereClause?: any, orderBy?: any, skip?: number, take?: number): Promise<any>;
+  abstract create(data: any, connectedUserId?: string): Promise<T>;
+  abstract findAll(params?: IPaginationParams, whereClause?: any): Promise<PaginationVm>;
+  abstract findOne(id: string): Promise<T>;
+  abstract update(id: string, data: Partial<any>, connectedUserId?: string): Promise<T>;
+  abstract delete(id: string): Promise<T>;
+  abstract softDelete(id: string, connectedUserId?: string): Promise<T>;
+  abstract restore(id: string, connectedUserId?: string): Promise<T>;
 }
