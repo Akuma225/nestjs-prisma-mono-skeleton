@@ -27,22 +27,18 @@ export class ProductController {
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, type: ProductVm })
-  @SingleFileUpload({
-    fieldName: 'image',
-    fileType: 'IMAGE',
-    fileSizeLimitMB: parseInt(process.env.MULTER_MAX_FILE_SIZE),
-    filePathEnum: FilePath.PRODUCT_IMAGE_PATH
-  })
+  // @SingleFileUpload({
+  //   fieldName: 'image',
+  //   fileType: 'IMAGE',
+  //   fileSizeLimitMB: parseInt(process.env.MULTER_MAX_FILE_SIZE),
+  //   filePathEnum: FilePath.PRODUCT_IMAGE_PATH
+  // })
   @Post()
   async create(
     @Body() createProductDto: CreateProductDto,
-    @Req() req: CustomRequest,
-    @UploadedFile() image: Express.Multer.File
+    @Req() req: CustomRequest
   ) {
-    return ProductVm.create(await this.productService.create({
-      ...createProductDto,
-      image
-    }, req.user?.id));
+    return ProductVm.create(await this.productService.create(createProductDto, req.user?.id));
   }
 
   @Get()
