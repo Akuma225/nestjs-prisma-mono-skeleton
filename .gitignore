@@ -39,3 +39,6 @@ documentation
 
 prisma/dbml
 prisma/json-schema
+
+yarn.lock
+package-lock.json
