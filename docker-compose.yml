@@ -1,0 +1,33 @@
+services:
+  # Service pour NestJS
+  app:
+    build:
+      context: . # Assure-toi que le Dockerfile est dans la racine du projet
+      dockerfile: Dockerfile
+    container_name: diata_auth_service
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://admin:1234@db:5432/diata_auth_db"
+      NODE_ENV: "development"
+    ports:
+      - "3040:3040"
+    command: sh -c "npm install && npx prisma db push && npm run start"
+    volumes:
+      - .:/usr/src/app
+
+  # Service pour PostgreSQL
+  db:
+    image: postgres:15
+    container_name: diata_auth_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: diata_auth_db
+    ports:
+      - "5421:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      
+volumes:
+  pgdata:
