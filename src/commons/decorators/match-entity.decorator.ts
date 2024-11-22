@@ -6,9 +6,8 @@ import {
 } from 'class-validator';
 import { ModelMappingTable } from '../enums/model-mapping.enum';
 import { DatabaseConstraint } from '../constraints/database.constraint';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RequestContextService } from '../services/request-context.service';
-import { IsUniqueMode } from '../enums/is_unique_mode.enum';
 import { MatchEntityOptions } from '../interfaces/match-entity-options';
 
 @Injectable()
@@ -19,8 +18,6 @@ export class AppEntityConstraint extends DatabaseConstraint {
   }
 
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
-    const [entity, property, options] = args.constraints;
-
     const isValid = await super.validate(value, args);
     if (isValid) {
       const foundEntity = this.getEntity();
@@ -44,15 +41,15 @@ export function MatchEntity(
   entity: ModelMappingTable,
   property: string,
   options?: MatchEntityOptions,
-  validationOptions?: ValidationOptions,
-  mode: IsUniqueMode = IsUniqueMode.INSENSITIVE,
+  validationOptions?: ValidationOptions
 ) {
+  Logger.log('Init MatchEntity');
   return function (object: Object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [entity, property, mode, options],
+      constraints: [entity, property, options],
       validator: AppEntityConstraint,
     });
   };
