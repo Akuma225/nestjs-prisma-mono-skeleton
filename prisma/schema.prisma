@@ -16,6 +16,7 @@ datasource db {
 model applications {
   id          String        @id @default(uuid())
   name        String
+  reference   String
   description String?
   is_active   Boolean       @default(true)
   created_at  DateTime      @default(now())
@@ -27,7 +28,7 @@ model applications {
   instances   instances[]
   app_configs app_configs[]
 
-  @@unique([name]) // Unique constraint
+  @@unique([reference]) // Unique constraint
   @@index([created_at]) // Index for speeding up ordering by created_at
 }
 
@@ -35,6 +36,7 @@ model instances {
   id                    String                  @id @default(uuid())
   application_id        String
   name                  String
+  reference             String
   api_key               String
   secret_key            String
   access_token_key      String
@@ -51,7 +53,7 @@ model instances {
   instance_auth_methods instance_auth_methods[]
   users                 users[]
 
-  @@unique([name]) // Unique constraint
+  @@unique([reference]) // Unique constraint
   @@unique([api_key, secret_key]) // Unique constraint for api_key and secret_key
   @@index([created_at]) // Index for speeding up ordering by created_at
   @@index([application_id]) // Index for speeding up filtering by application_id
