@@ -78,12 +78,6 @@ export class IdentificationGuard implements CanActivate {
       return true
     }
 
-    // Check if user account is activated
-    if (!user.mail_verified_at) {
-      Logger.log('User account is not activated...')
-      return true
-    }
-
     // Check if user auto login token is valid
     if (user.auto_login_token !== userData.auto_login_token) {
       Logger.log('Invalid Auto Login Token...')
@@ -95,7 +89,7 @@ export class IdentificationGuard implements CanActivate {
     request.user = userData
 
     // Activate extended audit
-    request.extended_audit = [Profile.ADMIN, Profile.SUPER_ADMIN].includes(userData.profile)
+    request.extended_audit = [Profile.ADMIN].includes(userData.profile)
 
     return true
   }

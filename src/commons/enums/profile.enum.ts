@@ -1,11 +1,9 @@
 export enum Profile {
-  CLIENT = 'CLIENT',
+  USER = 'USER',
   ADMIN = 'ADMIN',
-  SUPER_ADMIN = 'SUPER_ADMIN',
 }
 
 export enum ProfileVm {
-  CLIENT = 'CLIENT',
+  USER = 'USER',
   ADMIN = 'ADMIN',
-  SUPER_ADMIN = 'SUPER ADMIN',
 }

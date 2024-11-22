@@ -13,49 +13,273 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
-  id                    String            @id @default(cuid())
-  firstname             String
-  lastname              String
-  email                 String            @unique
-  contact               String?
-  is_active             Boolean           @default(true)
-  auto_login_token      String?
-  is_first_login        Boolean           @default(true)
-  mail_verified_at      DateTime?
-  activation_token      String?
-  activation_code       String?
-  activation_expires_at DateTime?
-  password              String
-  profile               Profile
-  created_at            DateTime          @default(now())
-  updated_at            DateTime          @updatedAt
+model applications {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  is_active   Boolean       @default(true)
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  deleted_at  DateTime?
+  created_by  String?
+  updated_by  String?
+  deleted_by  String?
+  instances   instances[]
+  app_configs app_configs[]
+
+  @@unique([name]) // Unique constraint
+  @@index([created_at]) // Index for speeding up ordering by created_at
+}
+
+model instances {
+  id                    String                  @id @default(uuid())
+  application_id        String
+  name                  String
+  api_key               String
+  secret_key            String
+  access_token_key      String
+  refresh_token_key     String
+  is_active             Boolean                 @default(true)
+  application           applications            @relation(fields: [application_id], references: [id])
+  created_at            DateTime                @default(now())
+  updated_at            DateTime                @updatedAt
   deleted_at            DateTime?
   created_by            String?
   updated_by            String?
   deleted_by            String?
-  password_resets       password_resets[]
+  instance_configs      instance_configs[]
+  instance_auth_methods instance_auth_methods[]
+  users                 users[]
+
+  @@unique([name]) // Unique constraint
+  @@unique([api_key, secret_key]) // Unique constraint for api_key and secret_key
+  @@index([created_at]) // Index for speeding up ordering by created_at
+  @@index([application_id]) // Index for speeding up filtering by application_id
+}
+
+model app_configs {
+  id             String       @id @default(uuid())
+  application_id String
+  key            AppConfigKey
+  value          String?
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+  deleted_at     DateTime?
+  created_by     String?
+  updated_by     String?
+  deleted_by     String?
+  application    applications @relation(fields: [application_id], references: [id])
+
+  @@unique([key, application_id]) // Unique constraint for key and application_id
+}
+
+model instance_configs {
+  id          String       @id @default(uuid())
+  instance_id String
+  key         AppConfigKey
+  value       String?
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+  deleted_at  DateTime?
+  created_by  String?
+  updated_by  String?
+  deleted_by  String?
+  instance    instances    @relation(fields: [instance_id], references: [id])
+
+  @@unique([key, instance_id]) // Unique constraint for key and instance_id
+}
+
+model users {
+  id                             String                           @id @default(uuid())
+  instance_id                    String
+  reference                      String
+  profile                        Profile                          @default(USER)
+  firstname                      String
+  lastname                       String
+  username                       String?
+  email                          String?
+  email_verified_at              DateTime?
+  contact                        String?
+  prefix                         String?
+  contact_verified_at            DateTime?
+  password                       String?
+  last_login_at                  DateTime?
+  is_active                      Boolean                          @default(true)
+  auto_login_token               String?
+  created_at                     DateTime                         @default(now())
+  updated_at                     DateTime                         @updatedAt
+  deleted_at                     DateTime?
+  created_by                     String?
+  updated_by                     String?
+  deleted_by                     String?
+  instance                       instances                        @relation(fields: [instance_id], references: [id])
+  user_external_providers_tokens user_external_providers_tokens[]
+  user_logs                      user_logs[]
+
+  @@unique([reference]) // Unique constraint for reference
+  @@index([instance_id]) // Index for speeding up filtering by instance_id
+  @@index([instance_id, email]) // Index for speeding up filtering by instance_id and email
+  @@index([instance_id, contact]) // Index for speeding up filtering by instance_id and contact
+  @@index([instance_id, username]) // Index for speeding up filtering by instance_id and username
+}
+
+model internal_providers {
+  id                    String                  @id @default(uuid())
+  label                 String
+  property              String
+  is_active             Boolean                 @default(true)
+  created_at            DateTime                @default(now())
+  updated_at            DateTime                @updatedAt
+  deleted_at            DateTime?
+  created_by            String?
+  updated_by            String?
+  deleted_by            String?
+  instance_auth_methods instance_auth_methods[]
+
+  @@unique([property]) // Unique constraint for property
+}
+
+model external_providers {
+  id                             String                           @id @default(uuid())
+  label                          String
+  code                           String
+  is_active                      Boolean                          @default(true)
+  created_at                     DateTime                         @default(now())
+  updated_at                     DateTime                         @updatedAt
+  deleted_at                     DateTime?
+  created_by                     String?
+  updated_by                     String?
+  deleted_by                     String?
+  instance_auth_methods          instance_auth_methods[]
+  user_external_providers_tokens user_external_providers_tokens[]
+
+  @@unique([code]) // Unique constraint for code
+}
+
+model instance_auth_methods {
+  id                   String              @id @default(uuid())
+  instance_id          String
+  internal_provider_id String?
+  external_provider_id String?
+  is_active            Boolean             @default(true)
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+  deleted_at           DateTime?
+  created_by           String?
+  updated_by           String?
+  deleted_by           String?
+  instance             instances           @relation(fields: [instance_id], references: [id])
+  internal_provider    internal_providers? @relation(fields: [internal_provider_id], references: [id])
+  external_provider    external_providers? @relation(fields: [external_provider_id], references: [id])
+
+  @@unique([instance_id, internal_provider_id]) // Unique constraint for instance_id and provider_id
+  @@unique([instance_id, external_provider_id]) // Unique constraint for instance_id and provider_id
+  @@index([instance_id]) // Index for speeding up filtering by instance_id
+}
+
+model user_external_providers_tokens {
+  id                   String             @id @default(uuid())
+  user_id              String
+  external_provider_id String
+  token                String
+  created_at           DateTime           @default(now())
+  updated_at           DateTime           @updatedAt
+  deleted_at           DateTime?
+  created_by           String?
+  updated_by           String?
+  deleted_by           String?
+  user                 users              @relation(fields: [user_id], references: [id])
+  external_provider    external_providers @relation(fields: [external_provider_id], references: [id])
+
+  @@unique([user_id, external_provider_id]) // Unique constraint for user_id and external_provider_id
+  @@index([user_id]) // Index for speeding up filtering by user_id
+}
+
+model user_logs {
+  id          String        @id @default(uuid())
+  user_id     String
+  action      UserLogAction
+  description String?
+  created_at  DateTime      @default(now())
+  created_by  String?
+  user        users         @relation(fields: [user_id], references: [id])
+
+  @@index([user_id]) // Index for speeding up filtering by user_id
+}
+
+model otp_verifications {
+  id          String              @id @default(uuid()) @db.Uuid
+  contact     String?
+  prefix      String?
+  email       String?
+  user_id     String?
+  code        String
+  token       String
+  type        OtpVerificationType
+  expires_at  DateTime
+  verified_at DateTime?
+  is_active   Boolean             @default(true)
+  created_at  DateTime            @default(now())
+  updated_at  DateTime            @updatedAt
+  deleted_at  DateTime?
+  created_by  String?
+  updated_by  String?
+  deleted_by  String?
+
+  @@index([user_id])
 }
 
 model password_resets {
-  id                  String    @id @default(cuid())
-  code                String    @db.VarChar(6)
-  token               String    @db.VarChar(32)
-  confirmed_at        DateTime?
-  expires_at          DateTime?
+  id                  String    @id @default(uuid()) @db.Uuid
   user_id             String
+  otp_verification_id String
+  password_change_at  DateTime?
   created_at          DateTime  @default(now())
-  updated_at          DateTime? @updatedAt
+  updated_at          DateTime  @updatedAt
   deleted_at          DateTime?
   created_by          String?
   updated_by          String?
   deleted_by          String?
-  password_changed_at DateTime?
-  user                users     @relation(fields: [user_id], references: [id])
 }
 
 enum Profile {
-  CLIENT
   ADMIN
-  SUPER_ADMIN
+  USER
+}
+
+enum AppConfigKey {
+  ACCESS_TOKEN_TTL
+  REFRESH_TOKEN_TTL
+  OTP_TTL
+  ENABLE_2FA
+  ADMIN_VERIFY_MODE
+  USER_VERIFY_MODE
+}
+
+enum UserLogAction {
+  SUCCEED_LOGIN
+  FAILED_LOGIN
+  LOGOUT
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET
+  PASSWORD_CHANGE
+  EMAIL_VERIFICATION_REQUEST
+  EMAIL_VERIFICATION
+  CONTACT_VERIFICATION_REQUEST
+  CONTACT_VERIFICATION
+  USERNAME_CHANGE
+  EMAIL_CHANGE
+  CONTACT_CHANGE
+  PROFILE_CHANGE
+  UPDATED_USER
+  DELETED_USER
+  DISABLED_USER
+  ENABLED_USER
+}
+
+enum OtpVerificationType {
+  SIGNIN_IDENTITY_VERIFICATION
+  PASSWORD_RESET
+  VERIFY_2FA
+  ACTION_VERIFY
 }
