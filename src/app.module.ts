@@ -25,6 +25,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { UserModule } from './resources/user/user.module';
 import { BootstrapService } from './commons/services/bootstrap.service';
 import { AppEntityConstraint } from './commons/decorators/match-entity.decorator';
+import { ApplicationModule } from './resources/application/application.module';
 
 /**
  * Module principal de l'application.
@@ -47,6 +48,7 @@ import { AppEntityConstraint } from './commons/decorators/match-entity.decorator
     // Modules de ressources
     AuthModule,
     UserModule,
+    ApplicationModule
   ],
   providers: [
     // Interceptors globaux

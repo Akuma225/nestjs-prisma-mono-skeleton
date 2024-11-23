@@ -18,6 +18,7 @@ import {
       value: any,
       property: string,
       options?: MatchEntityOptions,
+      errorMessage?: string,
     ): Promise<any> {
       const entityModel: any = this.prisma[model];
       if (!entityModel) {
@@ -32,7 +33,7 @@ import {
   
       if (!record) {
         throw new HttpException(
-          `${model} with ${property} ${value} not found.`,
+          errorMessage || `${model} with ${property} ${value} not found.`,
           HttpStatus.NOT_FOUND,
         );
       }
@@ -63,6 +64,7 @@ import {
         value,
         property,
         data.options,
+        data.errorMessage
       );
   
       request.params[data.key || 'id'] = record; // Remplacer la valeur par l'objet trouvé
