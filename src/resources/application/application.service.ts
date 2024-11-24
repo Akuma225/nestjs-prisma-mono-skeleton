@@ -8,13 +8,16 @@ import { ModelMappingPrefix } from 'src/commons/enums/model-mapping.enum';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { FilterApplicationDto } from './dto/filter-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
+import { DefaultAppConfigs } from 'src/commons/constants/default-app-configs';
+import { ApplicationConfigService } from './application-config/application-config.service';
 
 @Injectable()
 export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
 
     constructor(
         @Inject('MODEL_MAPPING') modelName: string,
-        private readonly referenceService: ReferenceService
+        private readonly referenceService: ReferenceService,
+        private readonly appConfigService: ApplicationConfigService
     ) {
         super(modelName);
     }
@@ -30,12 +33,18 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             connectedUserId
         });
 
-        // TODO: Create default configuration for the application
+        const defaultConfigs = DefaultAppConfigs.map(config => ({
+            application_id: app.id,
+            key: config.key,
+            value: config.value
+        }));
 
-        return app;
+        await this.appConfigService.upsertMany(defaultConfigs, connectedUserId);
+
+        return await this.findOne(app.id);
     }
 
-    findAll(params?: IPaginationParams, filter?: FilterApplicationDto): Promise<PaginationVm> {
+    async findAll(params?: IPaginationParams, filter?: FilterApplicationDto): Promise<PaginationVm> {
         let whereClause: any = {};
 
         if (filter?.is_active !== undefined) {
@@ -55,22 +64,53 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             };
         }
 
-        return this.genericFindAll({
+        const response = await this.genericFindAll({
             params,
             whereClause,
             orderBy: [
                 { created_at: 'desc' }
             ],
+            include: {
+                app_configs: true
+            },
             searchables: ['name', 'description', 'reference']
         });
+
+        const apps = response.result.map(app => ({
+            ...app,
+            app_configs: app.app_configs.map(config => ({
+                ...config,
+                value: this.appConfigService.parseValue(config.value)
+            }))
+        }));
+
+        return {
+            ...response,
+            result: apps
+        };
     }
 
-    findOne(id: string): Promise<ApplicationEntity> {
-        throw new Error('Method not implemented.');
+    async findOne(id: string): Promise<ApplicationEntity> {
+        const app = await this.genericFindOne({     
+            id,
+            include: {
+                app_configs: true
+            }
+        });
+
+        const appConfigs = app.app_configs.map(config => ({
+            ...config,
+            value: this.appConfigService.parseValue(config.value)
+        }));
+
+        return {
+            ...app,
+            app_configs: appConfigs
+        }
     }
 
-    update(id: string, data: UpdateApplicationDto, connectedUserId?: string): Promise<ApplicationEntity> {
-        return this.genericUpdate({
+    async update(id: string, data: UpdateApplicationDto, connectedUserId?: string): Promise<ApplicationEntity> {
+        await this.genericUpdate({
             id,
             data: {
                 ...(data.name && { name: data.name }),
@@ -79,21 +119,27 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             },
             connectedUserId
         });
+
+        return this.findOne(id);
     }
 
     delete(id: string): Promise<ApplicationEntity> {
         return this.genericDelete(id);
     }
-    softDelete(id: string, connectedUserId?: string): Promise<ApplicationEntity> {
-        return this.genericSoftDelete({
+    async softDelete(id: string, connectedUserId?: string): Promise<ApplicationEntity> {
+        await this.genericSoftDelete({
             id,
             connectedUserId
         });
+
+        return this.findOne(id);
     }
-    restore(id: string, connectedUserId?: string): Promise<ApplicationEntity> {
-        return this.genericRestore({
+    async restore(id: string, connectedUserId?: string): Promise<ApplicationEntity> {
+        await this.genericRestore({
             id,
             connectedUserId
         });
+
+        return this.findOne(id);
     }
 }

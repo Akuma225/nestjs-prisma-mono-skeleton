@@ -11,6 +11,7 @@ import { ModelMappingTable } from 'src/commons/enums/model-mapping.enum';
 import { ApplicationEntity } from './entites/application.entity';
 import { ParamId } from 'src/commons/decorators/param-id.decorator';
 import { UpdateApplicationDto } from './dto/update-application.dto';
+import { Transaction } from 'src/commons/decorators/transaction.decorator';
 
 @ApiTags('Applications')
 @Controller('applications')
@@ -18,6 +19,7 @@ export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
   @Post()
+  @Transaction()
   @ApiResponse({ status: 201, type: ApplicationVm })
   @ApiOperation({ summary: 'Create a new application' })
   @Version('1')
@@ -55,6 +57,7 @@ export class ApplicationController {
   }
 
   @Patch(':id')
+  @Transaction()
   @ApiResponse({ status: 200, type: ApplicationVm })
   @ApiOperation({ summary: 'Update application by id' })
   @Version('1')
