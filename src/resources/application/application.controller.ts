@@ -12,6 +12,7 @@ import { ApplicationEntity } from './entites/application.entity';
 import { ParamId } from 'src/commons/decorators/param-id.decorator';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { Transaction } from 'src/commons/decorators/transaction.decorator';
+import { UpdateApplicationConfigDto } from './dto/update-application-config.dto';
 
 @ApiTags('Applications')
 @Controller('applications')
@@ -54,6 +55,39 @@ export class ApplicationController {
     application: ApplicationEntity
   ) {
     return ApplicationVm.create(application);
+  }
+
+  @Patch(':id/configs')
+  @Transaction()
+  @ApiResponse({ status: 200, type: ApplicationVm })
+  @ApiOperation({ summary: 'Update application configs by id' })
+  @Version('1')
+  async updateConfigs(
+    @ParamId({
+      model: ModelMappingTable.APPLICATION,
+      errorMessage: "L'application n'existe pas"
+    })
+    applicationId: string,
+    @Body() data: UpdateApplicationConfigDto,
+    @Req() req: CustomRequest
+  ) {
+    return ApplicationVm.create(await this.applicationService.updateConfigs(applicationId, data, req.user?.id));
+  }
+
+  @Patch(':id/configs/reset')
+  @Transaction()
+  @ApiResponse({ status: 200, type: ApplicationVm })
+  @ApiOperation({ summary: 'Reset application configs by id' })
+  @Version('1')
+  async resetConfigs(
+    @ParamId({
+      model: ModelMappingTable.APPLICATION,
+      errorMessage: "L'application n'existe pas"
+    })
+    applicationId: string,
+    @Req() req: CustomRequest,
+  ) {
+    return ApplicationVm.create(await this.applicationService.resetConfigs(applicationId, req.user?.id));
   }
 
   @Patch(':id')

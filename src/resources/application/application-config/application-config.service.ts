@@ -45,10 +45,12 @@ export class ApplicationConfigService extends BaseCRUDService<ApplicationConfigE
         
         return this.prismaService.app_configs.upsert({
             where: {
-                id: data.application_id
+                key_application_id: {
+                    application_id: data.application_id,
+                    key: AppConfigKey[data.key]
+                }
             },
             update: {
-                key: AppConfigKey[data.key],
                 value: formattedValue,
                 updated_by: connectedUserId
             },

@@ -10,6 +10,7 @@ import { FilterApplicationDto } from './dto/filter-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { DefaultAppConfigs } from 'src/commons/constants/default-app-configs';
 import { ApplicationConfigService } from './application-config/application-config.service';
+import { UpdateApplicationConfigDto } from './dto/update-application-config.dto';
 
 @Injectable()
 export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
@@ -139,6 +140,31 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             id,
             connectedUserId
         });
+
+        return this.findOne(id);
+    }
+    async updateConfigs(id: string, data: UpdateApplicationConfigDto, connectedUserId?: string): Promise<ApplicationEntity> {
+        await this.appConfigService.upsertMany(
+            data.configs.map(config => ({
+                ...config,
+                application_id: id
+            }), 
+            connectedUserId
+        ), connectedUserId);
+
+        // TODO: Apply the configuration on the instances
+
+        return this.findOne(id);
+    }
+
+    async resetConfigs(id: string, connectedUserId?: string): Promise<ApplicationEntity> {
+        const defaultConfigs = DefaultAppConfigs.map(config => ({
+            application_id: id,
+            key: config.key,
+            value: config.value
+        }));
+
+        await this.appConfigService.upsertMany(defaultConfigs, connectedUserId);
 
         return this.findOne(id);
     }
