@@ -2,6 +2,8 @@ import { ApiResponseProperty } from "@nestjs/swagger";
 import { ApplicationConfigVm } from "./application-config.vm";
 import { ApplicationVm } from "./application.vm";
 import { BaseVm } from "./base.vm";
+import { InternalProviderVm } from "./internal-provider.vm";
+import { ExternalProviderVm } from "./external-provider.vm";
 
 export class InstanceVm extends BaseVm {
     
@@ -35,6 +37,12 @@ export class InstanceVm extends BaseVm {
     @ApiResponseProperty()
     configs?: ApplicationConfigVm[];
 
+    @ApiResponseProperty()
+    internal_providers?: { is_active: boolean, provider: InternalProviderVm }[];
+
+    @ApiResponseProperty()
+    external_providers?: { is_active: boolean, provider: ExternalProviderVm }[];
+
     constructor(data) {
         super(data);
         this.id = data.id;
@@ -47,5 +55,13 @@ export class InstanceVm extends BaseVm {
         this.is_active = data.is_active;
         this.configs = data.instance_configs ? data.instance_configs.map(config => new ApplicationConfigVm(config)) : [];
         this.application = data.application ? new ApplicationVm(data.application) : null;
+        this.internal_providers = data.instance_auth_methods ? data.instance_auth_methods.map(provider => ({
+            is_active: provider.is_active,
+            provider: new InternalProviderVm(provider.internal_provider),
+        })) : [];
+        this.external_providers = data.instance_auth_methods ? data.instance_auth_methods.map(provider => ({
+            is_active: provider.is_active,
+            provider: new ExternalProviderVm(provider.external_provider),
+        })) : [];
     }
 }

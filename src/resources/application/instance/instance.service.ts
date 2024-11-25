@@ -71,6 +71,28 @@ export class InstanceService extends BaseCRUDService<InstanceEntity> {
 
         await this.upsertMany(instanceConfigs, connectedUserId);
 
+        // Link the instance to the internal and external providers
+
+        let instanceProviders = [];
+
+        if (data.internal_provider_ids) {
+            instanceProviders = instanceProviders.concat(data.internal_provider_ids.map(providerId => ({
+                instance_id: createdInstance.id,
+                internal_provider_id: providerId,
+            })));
+        }
+
+        if (data.external_provider_ids) {
+            instanceProviders = instanceProviders.concat(data.external_provider_ids.map(providerId => ({
+                instance_id: createdInstance.id,
+                external_provider_id: providerId,
+            })));
+        }
+
+        await this.prismaService.instance_auth_methods.createMany({
+            data: instanceProviders,
+        });
+
         return await this.findOne(createdInstance.id);
     }
     findAll(params?: IPaginationParams, whereClause?: any): Promise<PaginationVm> {
@@ -82,6 +104,12 @@ export class InstanceService extends BaseCRUDService<InstanceEntity> {
             include: {
                 instance_configs: true,
                 application: true,
+                instance_auth_methods: {
+                    include: {
+                        internal_provider: true,
+                        external_provider: true,
+                    },
+                }
             }
         });
 

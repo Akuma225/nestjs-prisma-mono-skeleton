@@ -56,7 +56,9 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             configs: configs.map(config => ({
                 key: config.key,
                 value: config.value
-            }))
+            })),
+            internal_provider_ids: data.internal_provider_ids,
+            external_provider_ids: data.external_provider_ids
         }, connectedUserId);
 
         return await this.findOne(app.id);
@@ -90,7 +92,11 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             ],
             include: {
                 app_configs: true,
-                instances: true
+                instances: {
+                    orderBy: [
+                        { created_at: 'desc' }
+                    ]
+                }
             },
             searchables: ['name', 'description', 'reference']
         });
@@ -114,7 +120,11 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             id,
             include: {
                 app_configs: true,
-                instances: true
+                instances: {
+                    orderBy: [
+                        { created_at: 'desc' }
+                    ]
+                }
             }
         });
 
