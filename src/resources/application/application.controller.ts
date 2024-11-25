@@ -16,6 +16,8 @@ import { UpdateApplicationConfigDto } from './dto/update-application-config.dto'
 import { InstanceVm } from 'src/commons/shared/viewmodels/instance.vm';
 import { InstanceService } from './instance/instance.service';
 import { UpdateInstanceConfigDto } from './instance/dto/update-instance-config.dto';
+import { InstanceEntity } from './instance/entities/instance.entity';
+import { ResetInstanceConfigDto } from './instance/dto/reset-instance-config.dto';
 
 @ApiTags('Applications')
 @Controller('apps')
@@ -114,6 +116,29 @@ export class ApplicationController {
       await this.instanceService.updateInstanceConfigs(
         instanceId, 
         data, 
+        req.user?.id
+      )
+    );
+  }
+
+  @Patch('/instances/:id/configs/reset')
+  @Transaction()
+  @ApiResponse({ status: 200, type: InstanceVm })
+  @ApiOperation({ summary: 'Reset instance configs by id' })
+  @Version('1')
+  async resetInstanceConfigs(
+    @ParamEntity({
+      model: ModelMappingTable.INSTANCE,
+      errorMessage: "L'instance n'existe pas"
+    })
+    instance: InstanceEntity,
+    @Body() data: ResetInstanceConfigDto,
+    @Req() req: CustomRequest
+  ) {
+    return InstanceVm.create(
+      await this.instanceService.resetInstanceConfigs(
+        instance,
+        data,
         req.user?.id
       )
     );

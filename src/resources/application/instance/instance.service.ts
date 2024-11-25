@@ -15,6 +15,7 @@ import { parseConfigValue } from "../utils/parse-config-value";
 import { UpsertInstanceConfigDto } from "./dto/upsert-instance-config.dto";
 import { InstanceConfigEntity } from "./entities/instance-config.entity";
 import { UpdateInstanceConfigDto } from "./dto/update-instance-config.dto";
+import { ResetInstanceConfigDto } from "./dto/reset-instance-config.dto";
 
 @Injectable()
 export class InstanceService extends BaseCRUDService<InstanceEntity> {
@@ -55,7 +56,7 @@ export class InstanceService extends BaseCRUDService<InstanceEntity> {
             },
         }
 
-        const createdInstance = await this.genericCreate({ data: instanceData });
+        const createdInstance = await this.genericCreate({ data: instanceData, include: { application: true } });
 
         // Generate default configurations for the instance based on the application configurations. If no configurations are provided, use the default configurations.
         const instanceConfigs = data.configs ? data.configs.map(config => ({
@@ -115,6 +116,32 @@ export class InstanceService extends BaseCRUDService<InstanceEntity> {
         await this.upsertMany(data.configs, connectedUserId);
 
         return await this.findOne(instanceId);
+    }
+
+    async resetInstanceConfigs(instance: InstanceEntity, data: ResetInstanceConfigDto, connectedUserId?: string): Promise<InstanceEntity> {
+        let newConfigs = DefaultAppConfigs.map(config => ({
+            instance_id: instance.id,
+            key: AppConfigKey[config.key],
+            value: formatConfigValue(config.value),
+        }));
+
+        if (data.mode === 'application') {
+            const applicationConfigs = await this.prismaService.app_configs.findMany({
+                where: {
+                    application_id: instance.application_id,
+                },
+            });
+
+            newConfigs = applicationConfigs.map(config => ({
+                instance_id: instance.id,
+                key: AppConfigKey[config.key],
+                value: formatConfigValue(config.value),
+            }));
+        }
+
+        await this.upsertMany(newConfigs, connectedUserId);
+
+        return await this.findOne(instance.id);
     }
 
     upsert(data: UpsertInstanceConfigDto, connectedUserId?: string): Promise<InstanceConfigEntity> {
