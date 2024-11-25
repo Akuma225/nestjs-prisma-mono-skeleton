@@ -13,11 +13,17 @@ import { ParamId } from 'src/commons/decorators/param-id.decorator';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { Transaction } from 'src/commons/decorators/transaction.decorator';
 import { UpdateApplicationConfigDto } from './dto/update-application-config.dto';
+import { InstanceVm } from 'src/commons/shared/viewmodels/instance.vm';
+import { InstanceService } from './instance/instance.service';
+import { UpdateInstanceConfigDto } from './instance/dto/update-instance-config.dto';
 
 @ApiTags('Applications')
 @Controller('apps')
 export class ApplicationController {
-  constructor(private readonly applicationService: ApplicationService) {}
+  constructor(
+    private readonly applicationService: ApplicationService,
+    private readonly instanceService: InstanceService
+  ) {}
 
   @Post()
   @Transaction()
@@ -88,6 +94,29 @@ export class ApplicationController {
     @Req() req: CustomRequest,
   ) {
     return ApplicationVm.create(await this.applicationService.resetConfigs(applicationId, req.user?.id));
+  }
+
+  @Patch('/instances/:id/configs')
+  @Transaction()
+  @ApiResponse({ status: 200, type: InstanceVm })
+  @ApiOperation({ summary: 'Update instance configs by id' })
+  @Version('1')
+  async updateInstanceConfigs(
+    @ParamId({
+      model: ModelMappingTable.INSTANCE,
+      errorMessage: "L'instance n'existe pas"
+    })
+    instanceId: string,
+    @Body() data: UpdateInstanceConfigDto,
+    @Req() req: CustomRequest
+  ) {
+    return InstanceVm.create(
+      await this.instanceService.updateInstanceConfigs(
+        instanceId, 
+        data, 
+        req.user?.id
+      )
+    );
   }
 
   @Patch(':id')

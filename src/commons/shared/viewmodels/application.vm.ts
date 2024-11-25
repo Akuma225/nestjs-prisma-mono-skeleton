@@ -1,7 +1,7 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { BaseVm } from "./base.vm";
 import { ApplicationConfigVm } from "./application-config.vm";
-import { InstanceVm } from "./instance.vm";
+import { InstanceMinVm } from "./instance-min.vm";
 
 export class ApplicationVm extends BaseVm {
     
@@ -24,7 +24,7 @@ export class ApplicationVm extends BaseVm {
     configs: ApplicationConfigVm[];
 
     @ApiResponseProperty()
-    instances: InstanceVm[];
+    instances?: InstanceMinVm[];
 
     constructor(data) {
         super(data);
@@ -34,6 +34,6 @@ export class ApplicationVm extends BaseVm {
         this.description = data.description;
         this.is_active = data.is_active;
         this.configs = data.app_configs ? data.app_configs.map(config => new ApplicationConfigVm(config)) : [];
-        this.instances = data.instances ? data.instances.map(instance => new InstanceVm(instance)) : [];
+        this.instances = data.instances ? data.instances.map(instance => new InstanceMinVm(instance)) : [];
     }
 }

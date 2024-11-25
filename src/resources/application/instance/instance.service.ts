@@ -12,6 +12,9 @@ import { DefaultAppConfigs } from "src/commons/constants/default-app-configs";
 import { AppConfigKey } from "src/commons/enums/app-config-key.enum";
 import { formatConfigValue } from "../utils/format-config-value";
 import { parseConfigValue } from "../utils/parse-config-value";
+import { UpsertInstanceConfigDto } from "./dto/upsert-instance-config.dto";
+import { InstanceConfigEntity } from "./entities/instance-config.entity";
+import { UpdateInstanceConfigDto } from "./dto/update-instance-config.dto";
 
 @Injectable()
 export class InstanceService extends BaseCRUDService<InstanceEntity> {
@@ -65,9 +68,7 @@ export class InstanceService extends BaseCRUDService<InstanceEntity> {
             value: formatConfigValue(config.value),
         }));
 
-        await this.prismaService.instance_configs.createMany({
-            data: instanceConfigs,
-        });
+        await this.upsertMany(instanceConfigs, connectedUserId);
 
         return await this.findOne(createdInstance.id);
     }
@@ -104,6 +105,49 @@ export class InstanceService extends BaseCRUDService<InstanceEntity> {
     }
     restore(id: string, connectedUserId?: string): Promise<InstanceEntity> {
         throw new Error("Method not implemented.");
+    }
+
+    async updateInstanceConfigs(instanceId: string, data: UpdateInstanceConfigDto, connectedUserId?: string): Promise<InstanceEntity> {
+        data.configs = data.configs.map(config => ({
+            ...config,
+            instance_id: instanceId,
+        }));
+        await this.upsertMany(data.configs, connectedUserId);
+
+        return await this.findOne(instanceId);
+    }
+
+    upsert(data: UpsertInstanceConfigDto, connectedUserId?: string): Promise<InstanceConfigEntity> {
+        const formattedValue = formatConfigValue(data.value);
+        
+        return this.prismaService.instance_configs.upsert({
+            where: {
+                key_instance_id: {
+                    instance_id: data.instance_id,
+                    key: AppConfigKey[data.key]
+                }
+            },
+            update: {
+                value: formattedValue,
+                updated_by: connectedUserId
+            },
+            create: {
+                instance_id: data.instance_id,
+                key: AppConfigKey[data.key],
+                value: formattedValue,
+                created_by: connectedUserId
+            }
+        });
+    }
+
+    upsertMany(data: UpsertInstanceConfigDto[], connectedUserId?: string): Promise<InstanceConfigEntity[]> {
+        let result = [];
+
+        for (const item of data) {
+            result.push(this.upsert(item, connectedUserId));
+        }
+
+        return Promise.all(result);
     }
 
     /**
