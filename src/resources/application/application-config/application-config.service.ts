@@ -6,13 +6,13 @@ import { PaginationVm } from "src/commons/shared/viewmodels/pagination.vm";
 import { UpsertApplicationConfigDto } from "./dto/upsert-application-config.dto";
 import { PrismaService } from "src/commons/services/prisma.service";
 import { AppConfigKey } from "src/commons/enums/app-config-key.enum";
-import { isBooleanString, isNumberString, isObject } from "class-validator";
+import { formatConfigValue } from "../utils/format-config-value";
 
 @Injectable()
 export class ApplicationConfigService extends BaseCRUDService<ApplicationConfigEntity> {
 
     constructor(
-        @Inject('MODEL_MAPPING') modelName: string,
+        @Inject('MODEL_MAPPING_APP_CONFIG') modelName: string,
         private readonly prismaService: PrismaService
     ) {
         super(modelName);
@@ -41,7 +41,7 @@ export class ApplicationConfigService extends BaseCRUDService<ApplicationConfigE
     }
 
     upsert(data: UpsertApplicationConfigDto, connectedUserId?: string): Promise<ApplicationConfigEntity> {
-        const formattedValue = this.formatValue(data.value);
+        const formattedValue = formatConfigValue(data.value);
         
         return this.prismaService.app_configs.upsert({
             where: {
@@ -71,33 +71,5 @@ export class ApplicationConfigService extends BaseCRUDService<ApplicationConfigE
         }
 
         return Promise.all(result);
-    }
-
-    parseValue(value: string) {
-        if (isBooleanString(value)) {
-            return value === 'true';
-        }
-
-        if (isNumberString(value)) {
-            return parseInt(value);
-        }
-
-        if (isObject(value)) {
-            return JSON.parse(value);
-        }
-
-        return value;
-    }
-
-    formatValue(value: any) {
-        if (typeof value === 'boolean' || typeof value === 'number') {
-            return value.toString();
-        }
-
-        if (isObject(value)) {
-            return JSON.stringify(value);
-        }
-
-        return value;
     }
 }

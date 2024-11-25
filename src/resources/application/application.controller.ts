@@ -15,7 +15,7 @@ import { Transaction } from 'src/commons/decorators/transaction.decorator';
 import { UpdateApplicationConfigDto } from './dto/update-application-config.dto';
 
 @ApiTags('Applications')
-@Controller('applications')
+@Controller('apps')
 export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 

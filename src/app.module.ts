@@ -48,7 +48,7 @@ import { ApplicationModule } from './resources/application/application.module';
     // Modules de ressources
     AuthModule,
     UserModule,
-    ApplicationModule
+    ApplicationModule,
   ],
   providers: [
     // Interceptors globaux

@@ -11,19 +11,24 @@ import { UpdateApplicationDto } from './dto/update-application.dto';
 import { DefaultAppConfigs } from 'src/commons/constants/default-app-configs';
 import { ApplicationConfigService } from './application-config/application-config.service';
 import { UpdateApplicationConfigDto } from './dto/update-application-config.dto';
+import { InstanceService } from './instance/instance.service';
+import { parseConfigValue } from './utils/parse-config-value';
 
 @Injectable()
 export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
 
     constructor(
-        @Inject('MODEL_MAPPING') modelName: string,
+        @Inject('MODEL_MAPPING_APPLICATION') modelName: string,
         private readonly referenceService: ReferenceService,
-        private readonly appConfigService: ApplicationConfigService
+        private readonly appConfigService: ApplicationConfigService,
+        private readonly instanceService: InstanceService
     ) {
         super(modelName);
     }
 
     async create(data: CreateApplicationDto, connectedUserId?: string): Promise<ApplicationEntity> {
+        const INSTANCE_DEFAULT_NAME = 'default';
+
         const reference = await this.referenceService.generate(ModelMappingPrefix.APPLICATION);
         
         const app = await this.genericCreate({
@@ -40,7 +45,19 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             value: config.value
         }));
 
-        await this.appConfigService.upsertMany(defaultConfigs, connectedUserId);
+        // Create default configurations for the application
+        const configs = await this.appConfigService.upsertMany(defaultConfigs, connectedUserId);
+
+        // Create a default instance for the application
+        await this.instanceService.create({
+            application_id: app.id,
+            name: INSTANCE_DEFAULT_NAME,
+            is_active: app.is_active,
+            configs: configs.map(config => ({
+                key: config.key,
+                value: config.value
+            }))
+        }, connectedUserId);
 
         return await this.findOne(app.id);
     }
@@ -81,7 +98,7 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
             ...app,
             app_configs: app.app_configs.map(config => ({
                 ...config,
-                value: this.appConfigService.parseValue(config.value)
+                value: parseConfigValue(config.value)
             }))
         }));
 
@@ -95,13 +112,14 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
         const app = await this.genericFindOne({     
             id,
             include: {
-                app_configs: true
+                app_configs: true,
+                instances: true
             }
         });
 
         const appConfigs = app.app_configs.map(config => ({
             ...config,
-            value: this.appConfigService.parseValue(config.value)
+            value: parseConfigValue(config.value)
         }));
 
         return {
