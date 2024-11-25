@@ -89,7 +89,8 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
                 { created_at: 'desc' }
             ],
             include: {
-                app_configs: true
+                app_configs: true,
+                instances: true
             },
             searchables: ['name', 'description', 'reference']
         });

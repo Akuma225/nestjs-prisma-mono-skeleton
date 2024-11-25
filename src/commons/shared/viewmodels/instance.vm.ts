@@ -46,5 +46,6 @@ export class InstanceVm extends BaseVm {
         this.refresh_token_key = data.refresh_token_key;
         this.is_active = data.is_active;
         this.configs = data.instance_configs ? data.instance_configs.map(config => new ApplicationConfigVm(config)) : [];
+        this.application = data.application ? new ApplicationVm(data.application) : null;
     }
 }

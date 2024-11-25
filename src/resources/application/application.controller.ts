@@ -18,6 +18,8 @@ import { InstanceService } from './instance/instance.service';
 import { UpdateInstanceConfigDto } from './instance/dto/update-instance-config.dto';
 import { InstanceEntity } from './instance/entities/instance.entity';
 import { ResetInstanceConfigDto } from './instance/dto/reset-instance-config.dto';
+import { CreateInstanceDto } from './instance/dto/create-instance.dto';
+import { application } from 'express';
 
 @ApiTags('Applications')
 @Controller('apps')
@@ -39,6 +41,28 @@ export class ApplicationController {
     return ApplicationVm.create(await this.applicationService.create(data, req.user?.id));
   }
 
+  @Post('/:id/instances')
+  @Transaction()
+  @ApiResponse({ status: 201, type: InstanceVm })
+  @ApiOperation({ summary: 'Create a new application instance' })
+  @Version('1')
+  async createInstance(
+    @ParamEntity({
+      model: ModelMappingTable.APPLICATION,
+      errorMessage: "L'application n'existe pas"
+    }) application: ApplicationEntity,
+    @Body() data: CreateInstanceDto,
+    @Req() req: CustomRequest
+  ) {
+    return InstanceVm.create(await this.instanceService.create(
+      {
+        ...data,
+        application_id: application.id
+      }, 
+      req.user?.id
+    ));
+  }
+
   @Get()
   @Pagination()
   @ApiResponse({ status: 200, type: ApplicationVm, isArray: true })
@@ -58,7 +82,13 @@ export class ApplicationController {
   async findOne(
     @ParamEntity({
       model: ModelMappingTable.APPLICATION,
-      errorMessage: "L'application n'existe pas"
+      errorMessage: "L'application n'existe pas",
+      options: {
+        include: {
+          instances: true,
+          app_configs: true
+        }
+      }
     })
     application: ApplicationEntity
   ) {
