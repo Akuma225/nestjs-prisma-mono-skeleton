@@ -358,11 +358,11 @@ export abstract class BaseCRUDService<T> {
   }
 
   // Méthodes abstraites à implémenter par les classes dérivées
-  abstract create(data: any, connectedUserId?: string): Promise<T>;
+  /*abstract create(data: any, connectedUserId?: string): Promise<T>;
   abstract findAll(params?: IPaginationParams, whereClause?: any): Promise<PaginationVm>;
   abstract findOne(id: string): Promise<T>;
   abstract update(id: string, data: Partial<any>, connectedUserId?: string): Promise<T>;
   abstract delete(id: string): Promise<T>;
   abstract softDelete(id: string, connectedUserId?: string): Promise<T>;
-  abstract restore(id: string, connectedUserId?: string): Promise<T>;
+  abstract restore(id: string, connectedUserId?: string): Promise<T>;*/
 }

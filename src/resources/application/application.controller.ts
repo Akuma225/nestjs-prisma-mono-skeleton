@@ -20,6 +20,8 @@ import { InstanceEntity } from './instance/entities/instance.entity';
 import { ResetInstanceConfigDto } from './instance/dto/reset-instance-config.dto';
 import { CreateInstanceDto } from './instance/dto/create-instance.dto';
 import { application } from 'express';
+import { UpdateInstanceDto } from './instance/dto/update-instance.dto';
+import { PaginationVm } from 'src/commons/shared/viewmodels/pagination.vm';
 
 @ApiTags('Applications')
 @Controller('apps')
@@ -63,6 +65,74 @@ export class ApplicationController {
     ));
   }
 
+  @Delete('/instances/:id/soft')
+  @ApiResponse({ status: 201, type: InstanceVm })
+  @ApiOperation({ summary: 'Soft delete an instance' })
+  @Version('1')
+  async softDeleteInstance(
+    @ParamId({
+      model: ModelMappingTable.INSTANCE,
+      errorMessage: "L'instance n'existe pas"
+    }) instanceId: string,
+    @Req() req: CustomRequest
+  ) {
+    return InstanceVm.create(await this.instanceService.softDelete(
+      instanceId, 
+      req.user?.id
+    ));
+  }
+
+  @Patch('/instances/:id/restore')
+  @ApiResponse({ status: 201, type: InstanceVm })
+  @ApiOperation({ summary: 'Restore an instance' })
+  @Version('1')
+  async restoreInstance(
+    @ParamId({
+      model: ModelMappingTable.INSTANCE,
+      errorMessage: "L'instance n'existe pas"
+    }) instanceId: string,
+    @Req() req: CustomRequest
+  ) {
+    return InstanceVm.create(await this.instanceService.restore(
+      instanceId, 
+      req.user?.id
+    ));
+  }
+
+  @Get('/:appId/instances')
+  @Pagination()
+  @ApiResponse({ status: 201, type: PaginationVm })
+  @ApiOperation({ summary: 'Find all instances for an application' })
+  @Version('1')
+  async getAppInstances(
+    @ParamId({
+      model: ModelMappingTable.APPLICATION,
+      errorMessage: "L'application n'existe pas",
+      key: 'appId'
+    }) appId: string,
+    @Req() req: CustomRequest
+  ) {
+    return InstanceVm.create(await this.instanceService.findAll(
+      req.pagination,
+      { application_id: appId }
+    ));
+  }
+
+  @Get('/instances/:id')
+  @ApiResponse({ status: 201, type: InstanceVm })
+  @ApiOperation({ summary: 'Find an instance' })
+  @Version('1')
+  async findInstance(
+    @ParamId({
+      model: ModelMappingTable.INSTANCE,
+      errorMessage: "L'instance n'existe pas"
+    }) instanceId: string
+  ) {
+    return InstanceVm.create(await this.instanceService.findOne(
+      instanceId
+    ));
+  }
+
   @Get()
   @Pagination()
   @ApiResponse({ status: 200, type: ApplicationVm, isArray: true })
@@ -93,6 +163,26 @@ export class ApplicationController {
     application: ApplicationEntity
   ) {
     return ApplicationVm.create(application);
+  }
+
+  @Patch('/instances/:id')
+  @Transaction()
+  @ApiResponse({ status: 201, type: InstanceVm })
+  @ApiOperation({ summary: 'Update a new instance' })
+  @Version('1')
+  async updateInstance(
+    @ParamId({
+      model: ModelMappingTable.INSTANCE,
+      errorMessage: "L'instance n'existe pas !"
+    }) instanceId: string,
+    @Body() data: UpdateInstanceDto,
+    @Req() req: CustomRequest
+  ) {
+    return InstanceVm.create(await this.instanceService.update(
+      instanceId,
+      data, 
+      req.user?.id
+    ));
   }
 
   @Patch(':id/configs')

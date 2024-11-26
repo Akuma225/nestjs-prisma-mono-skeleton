@@ -4,6 +4,7 @@ import { ApplicationVm } from "./application.vm";
 import { BaseVm } from "./base.vm";
 import { InternalProviderVm } from "./internal-provider.vm";
 import { ExternalProviderVm } from "./external-provider.vm";
+import { InstanceEntity } from "src/resources/application/instance/entities/instance.entity";
 
 export class InstanceVm extends BaseVm {
     
@@ -43,7 +44,7 @@ export class InstanceVm extends BaseVm {
     @ApiResponseProperty()
     external_providers?: { is_active: boolean, provider: ExternalProviderVm }[];
 
-    constructor(data) {
+    constructor(data: InstanceEntity) {
         super(data);
         this.id = data.id;
         this.name = data.name;
@@ -55,11 +56,15 @@ export class InstanceVm extends BaseVm {
         this.is_active = data.is_active;
         this.configs = data.instance_configs ? data.instance_configs.map(config => new ApplicationConfigVm(config)) : [];
         this.application = data.application ? new ApplicationVm(data.application) : null;
-        this.internal_providers = data.instance_auth_methods ? data.instance_auth_methods.map(provider => ({
+        this.internal_providers = data.instance_auth_methods ? data.instance_auth_methods
+        .filter(provider => provider.internal_provider)
+        .map(provider => ({
             is_active: provider.is_active,
             provider: new InternalProviderVm(provider.internal_provider),
         })) : [];
-        this.external_providers = data.instance_auth_methods ? data.instance_auth_methods.map(provider => ({
+        this.external_providers = data.instance_auth_methods ? data.instance_auth_methods
+        .filter(provider => provider.external_provider)
+        .map(provider => ({
             is_active: provider.is_active,
             provider: new ExternalProviderVm(provider.external_provider),
         })) : [];

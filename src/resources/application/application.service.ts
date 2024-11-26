@@ -33,7 +33,9 @@ export class ApplicationService extends BaseCRUDService<ApplicationEntity> {
         
         const app = await this.genericCreate({
             data: {
-                ...data,
+                name: data.name,
+                description: data.description,
+                is_active: data.is_active,
                 reference
             },
             connectedUserId

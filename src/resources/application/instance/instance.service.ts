@@ -16,6 +16,8 @@ import { UpsertInstanceConfigDto } from "./dto/upsert-instance-config.dto";
 import { InstanceConfigEntity } from "./entities/instance-config.entity";
 import { UpdateInstanceConfigDto } from "./dto/update-instance-config.dto";
 import { ResetInstanceConfigDto } from "./dto/reset-instance-config.dto";
+import { FilterInstanceDto } from "./dto/filter-instance.dto";
+import { UpdateInstanceDto } from "./dto/update-instance.dto";
 
 @Injectable()
 export class InstanceService extends BaseCRUDService<InstanceEntity> {
@@ -95,8 +97,14 @@ export class InstanceService extends BaseCRUDService<InstanceEntity> {
 
         return await this.findOne(createdInstance.id);
     }
-    findAll(params?: IPaginationParams, whereClause?: any): Promise<PaginationVm> {
-        throw new Error("Method not implemented.");
+    findAll(params?: IPaginationParams, filter?: FilterInstanceDto): Promise<PaginationVm> {
+        let whereClause: any = {};
+
+        if (filter.application_id) {
+            whereClause.application_id = filter.application_id;
+        }
+
+        return this.genericFindAll({ params, whereClause, include: { application: true }, orderBy: [ { created_at: 'desc' } ] });
     }
     async findOne(id: string): Promise<InstanceEntity> {
         const instance = await this.genericFindOne({     
@@ -123,17 +131,64 @@ export class InstanceService extends BaseCRUDService<InstanceEntity> {
             instance_configs: configs
         }
     }
-    update(id: string, data: Partial<any>, connectedUserId?: string): Promise<InstanceEntity> {
-        throw new Error("Method not implemented.");
+    async update(id: string, data: UpdateInstanceDto, connectedUserId?: string): Promise<InstanceEntity> {
+        await this.genericUpdate({ 
+            id, 
+            data: {
+                ...(data.name && { name: data.name }),
+                ...(data.is_active !== undefined && { is_active: data.is_active }),
+            }, 
+            connectedUserId
+        });
+
+        if (data.internal_providers && data.internal_providers.length > 0) {
+            const internalProviders = data.internal_providers.map(provider => ({
+                instance_id: id,
+                internal_provider_id: provider.internal_provider_id,
+                is_active: provider.is_active,
+            }));
+
+            await this.prismaService.instance_auth_methods.deleteMany({
+                where: {
+                    instance_id:id,
+                    external_provider_id: null,
+                },
+            });
+
+            await this.prismaService.instance_auth_methods.createMany({
+                data: internalProviders,
+            });
+        }
+
+        if(data.external_providers && data.external_providers.length > 0) {
+            const externalProviders = data.external_providers.map(provider => ({
+                instance_id: id,
+                external_provider_id: provider.external_provider_id,
+                is_active: provider.is_active,
+            }));
+
+            await this.prismaService.instance_auth_methods.deleteMany({
+                where: {
+                    instance_id: id,
+                    internal_provider_id: null,
+                },
+            });
+
+            await this.prismaService.instance_auth_methods.createMany({
+                data: externalProviders,
+            });
+        }
+
+        return await this.findOne(id);
     }
     delete(id: string): Promise<InstanceEntity> {
         throw new Error("Method not implemented.");
     }
     softDelete(id: string, connectedUserId?: string): Promise<InstanceEntity> {
-        throw new Error("Method not implemented.");
+        return this.genericSoftDelete({ id, connectedUserId });
     }
     restore(id: string, connectedUserId?: string): Promise<InstanceEntity> {
-        throw new Error("Method not implemented.");
+        return this.genericRestore({ id, connectedUserId });
     }
 
     async updateInstanceConfigs(instanceId: string, data: UpdateInstanceConfigDto, connectedUserId?: string): Promise<InstanceEntity> {
