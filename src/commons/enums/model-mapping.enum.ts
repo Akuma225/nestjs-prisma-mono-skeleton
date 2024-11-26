@@ -11,6 +11,7 @@ export enum ModelMappingTable {
   USER_EXTERNAL_PROVIDER_TOKEN = 'user_external_providers_tokens',
   USER_LOG = 'user_logs',
   OTP_VERIFICATION = 'otp_verifications',
+  ADMIN = 'admins',
 }
 
 export enum ModelMappingPrefix {
@@ -26,4 +27,5 @@ export enum ModelMappingPrefix {
   USER_EXTERNAL_PROVIDER_TOKEN = 'UET',
   USER_LOG = 'ULG',
   OTP_VERIFICATION = 'OTP',
+  ADMIN = 'ADM',
 }

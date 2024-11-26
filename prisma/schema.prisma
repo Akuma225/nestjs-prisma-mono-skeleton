@@ -244,7 +244,27 @@ model password_resets {
   deleted_by          String?
 }
 
+model admins {
+  id                String       @id @default(uuid())
+  profile           AdminProfile @default(ADMIN)
+  firstname         String
+  lastname          String
+  email             String       @unique
+  email_verified_at DateTime?
+  password          String?
+  last_login_at     DateTime?
+  is_active         Boolean      @default(true)
+  auto_login_token  String?
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  deleted_at        DateTime?
+  created_by        String?
+  updated_by        String?
+  deleted_by        String?
+}
+
 enum Profile {
+  SUPER_ADMIN
   ADMIN
   USER
 }
@@ -284,4 +304,9 @@ enum OtpVerificationType {
   PASSWORD_RESET
   VERIFY_2FA
   ACTION_VERIFY
+}
+
+enum AdminProfile {
+  SUPER_ADMIN
+  ADMIN
 }

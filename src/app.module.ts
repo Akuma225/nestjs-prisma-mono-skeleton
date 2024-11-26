@@ -26,6 +26,7 @@ import { UserModule } from './resources/user/user.module';
 import { BootstrapService } from './commons/services/bootstrap.service';
 import { AppEntityConstraint } from './commons/decorators/match-entity.decorator';
 import { ApplicationModule } from './resources/application/application.module';
+import { AdminModule } from './resources/admin/admin.module';
 
 /**
  * Module principal de l'application.
@@ -49,6 +50,7 @@ import { ApplicationModule } from './resources/application/application.module';
     AuthModule,
     UserModule,
     ApplicationModule,
+    AdminModule
   ],
   providers: [
     // Interceptors globaux

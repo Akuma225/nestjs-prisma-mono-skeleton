@@ -1,11 +1,9 @@
-export enum Profile {
-  USER = 'USER',
+export enum AdminProfile {
   ADMIN = 'ADMIN',
   SUPER_ADMIN = 'SUPER_ADMIN',
 }
 
-export enum ProfileVm {
-  USER = 'USER',
+export enum AdminProfileVm {
   ADMIN = 'ADMIN',
   SUPER_ADMIN = 'SUPER ADMIN',
 }

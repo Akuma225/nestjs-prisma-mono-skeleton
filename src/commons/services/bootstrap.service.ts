@@ -16,6 +16,7 @@ export class BootstrapService implements OnApplicationBootstrap {
 
     await this.createInternalProviders();
     await this.createExternalProviders();
+    await this.createAdmin();
 
     Logger.log('Bootstrapping Finished');
   }
@@ -60,4 +61,30 @@ export class BootstrapService implements OnApplicationBootstrap {
     Logger.log('External Providers bootstrapping finished.');
   }
 
+  async createAdmin() {
+    Logger.log('Admin bootstrapping...');
+
+    const existingCount = await this.prismaService.admins.count();
+
+    if (existingCount > 0) {
+      Logger.log('Admin already exists. Skipping...');
+      return;
+    }
+
+    const password = await bcrypt.hash('admin1234', 10);
+
+    await this.prismaService.admins.create({
+      data: {
+        firstname: 'John',
+        lastname: 'Doe',
+        email: 'johndoe@test.com',
+        password,
+        profile: Profile.SUPER_ADMIN,
+        is_active: true,
+        email_verified_at: new Date()
+      }
+    });
+
+    Logger.log('Admin created.');
+  }
 }
