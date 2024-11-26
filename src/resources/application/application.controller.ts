@@ -22,6 +22,7 @@ import { CreateInstanceDto } from './instance/dto/create-instance.dto';
 import { application } from 'express';
 import { UpdateInstanceDto } from './instance/dto/update-instance.dto';
 import { PaginationVm } from 'src/commons/shared/viewmodels/pagination.vm';
+import { IsAdminAuthenticated } from 'src/commons/decorators/is-admin-authenticated.decorator';
 
 @ApiTags('Applications')
 @Controller('apps')
@@ -36,6 +37,7 @@ export class ApplicationController {
   @ApiResponse({ status: 201, type: ApplicationVm })
   @ApiOperation({ summary: 'Create a new application' })
   @Version('1')
+  @IsAdminAuthenticated()
   async create(
     @Body() data: CreateApplicationDto,
     @Req() req: CustomRequest
@@ -48,6 +50,7 @@ export class ApplicationController {
   @ApiResponse({ status: 201, type: InstanceVm })
   @ApiOperation({ summary: 'Create a new application instance' })
   @Version('1')
+  @IsAdminAuthenticated()
   async createInstance(
     @ParamEntity({
       model: ModelMappingTable.APPLICATION,
@@ -69,6 +72,7 @@ export class ApplicationController {
   @ApiResponse({ status: 201, type: InstanceVm })
   @ApiOperation({ summary: 'Soft delete an instance' })
   @Version('1')
+  @IsAdminAuthenticated()
   async softDeleteInstance(
     @ParamId({
       model: ModelMappingTable.INSTANCE,
@@ -86,6 +90,7 @@ export class ApplicationController {
   @ApiResponse({ status: 201, type: InstanceVm })
   @ApiOperation({ summary: 'Restore an instance' })
   @Version('1')
+  @IsAdminAuthenticated()
   async restoreInstance(
     @ParamId({
       model: ModelMappingTable.INSTANCE,
@@ -104,6 +109,7 @@ export class ApplicationController {
   @ApiResponse({ status: 201, type: PaginationVm })
   @ApiOperation({ summary: 'Find all instances for an application' })
   @Version('1')
+  @IsAdminAuthenticated()
   async getAppInstances(
     @ParamId({
       model: ModelMappingTable.APPLICATION,
@@ -122,6 +128,7 @@ export class ApplicationController {
   @ApiResponse({ status: 201, type: InstanceVm })
   @ApiOperation({ summary: 'Find an instance' })
   @Version('1')
+  @IsAdminAuthenticated()
   async findInstance(
     @ParamId({
       model: ModelMappingTable.INSTANCE,
@@ -138,6 +145,7 @@ export class ApplicationController {
   @ApiResponse({ status: 200, type: ApplicationVm, isArray: true })
   @ApiOperation({ summary: 'Get all applications' })
   @Version('1')
+  @IsAdminAuthenticated()
   async findAll(
     @Req() req: CustomRequest,
     @Query() filter: FilterApplicationDto
@@ -149,6 +157,7 @@ export class ApplicationController {
   @ApiResponse({ status: 200, type: ApplicationVm })
   @ApiOperation({ summary: 'Get application by id' })
   @Version('1')
+  @IsAdminAuthenticated()
   async findOne(
     @ParamEntity({
       model: ModelMappingTable.APPLICATION,
@@ -170,6 +179,7 @@ export class ApplicationController {
   @ApiResponse({ status: 201, type: InstanceVm })
   @ApiOperation({ summary: 'Update a new instance' })
   @Version('1')
+  @IsAdminAuthenticated()
   async updateInstance(
     @ParamId({
       model: ModelMappingTable.INSTANCE,
@@ -190,6 +200,7 @@ export class ApplicationController {
   @ApiResponse({ status: 200, type: ApplicationVm })
   @ApiOperation({ summary: 'Update application configs by id' })
   @Version('1')
+  @IsAdminAuthenticated()
   async updateConfigs(
     @ParamId({
       model: ModelMappingTable.APPLICATION,
@@ -207,6 +218,7 @@ export class ApplicationController {
   @ApiResponse({ status: 200, type: ApplicationVm })
   @ApiOperation({ summary: 'Reset application configs by id' })
   @Version('1')
+  @IsAdminAuthenticated()
   async resetConfigs(
     @ParamId({
       model: ModelMappingTable.APPLICATION,
@@ -223,6 +235,7 @@ export class ApplicationController {
   @ApiResponse({ status: 200, type: InstanceVm })
   @ApiOperation({ summary: 'Update instance configs by id' })
   @Version('1')
+  @IsAdminAuthenticated()
   async updateInstanceConfigs(
     @ParamId({
       model: ModelMappingTable.INSTANCE,
@@ -246,6 +259,7 @@ export class ApplicationController {
   @ApiResponse({ status: 200, type: InstanceVm })
   @ApiOperation({ summary: 'Reset instance configs by id' })
   @Version('1')
+  @IsAdminAuthenticated()
   async resetInstanceConfigs(
     @ParamEntity({
       model: ModelMappingTable.INSTANCE,
@@ -269,6 +283,7 @@ export class ApplicationController {
   @ApiResponse({ status: 200, type: ApplicationVm })
   @ApiOperation({ summary: 'Update application by id' })
   @Version('1')
+  @IsAdminAuthenticated()
   async update(
     @ParamId({
       model: ModelMappingTable.APPLICATION,
@@ -289,6 +304,7 @@ export class ApplicationController {
   })
   @ApiOperation({ summary: 'Soft delete an application' })
   @Version('1')
+  @IsAdminAuthenticated()
   async softDelete(
     @ParamId({
       model: ModelMappingTable.APPLICATION,
@@ -309,6 +325,7 @@ export class ApplicationController {
   })
   @ApiOperation({ summary: 'Restore an application' })
   @Version('1')
+  @IsAdminAuthenticated()
   async restore(
     @ParamId({
       model: ModelMappingTable.APPLICATION,

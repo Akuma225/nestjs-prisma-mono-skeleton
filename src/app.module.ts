@@ -2,7 +2,6 @@ import { Global, MiddlewareConsumer, Module, OnModuleInit, RequestMethod } from 
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './commons/interceptors/response.interceptor';
-import { IdentificationGuard } from './commons/guards/identification.guard';
 import { PrismaService } from './commons/services/prisma.service';
 import { PaginationMiddleware } from './commons/middlewares/pagination.middleware';
 import { AuthModule } from './resources/auth/auth.module';
@@ -63,10 +62,6 @@ import { AdminModule } from './resources/admin/admin.module';
       useClass: RequestContextInterceptor,
     },
     // Guards globaux
-    {
-      provide: APP_GUARD,
-      useClass: IdentificationGuard,
-    },
     // {
     //   provide: APP_GUARD,
     //   useClass: ThrottlerGuard,

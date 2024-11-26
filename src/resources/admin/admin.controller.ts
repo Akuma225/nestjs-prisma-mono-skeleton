@@ -13,6 +13,8 @@ import { Pagination } from 'src/commons/decorators/pagination.decorator';
 import { FilterAdminDto } from './dto/filter-admin.dto';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { TokenPair } from 'src/commons/shared/entities/token_pair.model';
+import { IsAdminAuthenticated } from 'src/commons/decorators/is-admin-authenticated.decorator';
+import { AdminProfile } from 'src/commons/enums/admin-profile.enum';
 
 @ApiTags('Admin')
 @Controller('admins')
@@ -33,6 +35,7 @@ export class AdminController {
   @Version('1')
   @ApiResponse({ status: 201, type: AdminVm })
   @ApiOperation({ summary: 'Create a new admin' })
+  @IsAdminAuthenticated([AdminProfile.SUPER_ADMIN])
   async create(
     @Body() data: CreateAdminDto,
     @Req() req: CustomRequest,
@@ -44,6 +47,7 @@ export class AdminController {
   @Version('1')
   @ApiResponse({ status: 200, type: AdminVm })
   @ApiOperation({ summary: 'Update an admin' })
+  @IsAdminAuthenticated([AdminProfile.SUPER_ADMIN])
   async update(
     @ParamId({
       model: ModelMappingTable.ADMIN,
@@ -59,6 +63,7 @@ export class AdminController {
   @Version('1')
   @ApiResponse({ status: 200, type: AdminVm })
   @ApiOperation({ summary: 'Find one admin' })
+  @IsAdminAuthenticated([AdminProfile.SUPER_ADMIN])
   async find(
     @ParamEntity({
       model: ModelMappingTable.ADMIN,
@@ -73,6 +78,7 @@ export class AdminController {
   @Version('1')
   @ApiResponse({ status: 200, type: AdminVm })
   @ApiOperation({ summary: 'Get all admins' })
+  @IsAdminAuthenticated([AdminProfile.SUPER_ADMIN])
   async getAll(
     @Query() filter: FilterAdminDto,
     @Req() req: CustomRequest,
@@ -84,6 +90,7 @@ export class AdminController {
   @Version('1')
   @ApiResponse({ status: 200, type: AdminVm })
   @ApiOperation({ summary: 'Soft delete an admin' })
+  @IsAdminAuthenticated([AdminProfile.SUPER_ADMIN])
   async softDelete(
     @ParamId({
       model: ModelMappingTable.ADMIN,
@@ -98,6 +105,7 @@ export class AdminController {
   @Version('1')
   @ApiResponse({ status: 200, type: AdminVm })
   @ApiOperation({ summary: 'Restore an admin' })
+  @IsAdminAuthenticated([AdminProfile.SUPER_ADMIN])
   async restore(
     @ParamId({
       model: ModelMappingTable.ADMIN,
