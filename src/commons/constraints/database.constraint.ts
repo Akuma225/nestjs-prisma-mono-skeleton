@@ -22,6 +22,8 @@ export abstract class DatabaseConstraint
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
     const [entity, property, mode, options] = args.constraints;
     const request: CustomRequest = this.requestContextService.getContext();
+
+    Logger.log("DatabaseConstraint Validation")
     
     let where: any = {
       [property]: property != 'id' && mode ? {
@@ -50,12 +52,12 @@ export abstract class DatabaseConstraint
       include: options?.include,
     });
 
+    Logger.log(record, 'DatabaseConstraint validate record');
     if (record) {
       this.foundEntity = record;
-      return this.checkRecord(record);
     }
 
-    return false;
+    return this.checkRecord(record);
   }
 
   abstract checkRecord(record: any): boolean;

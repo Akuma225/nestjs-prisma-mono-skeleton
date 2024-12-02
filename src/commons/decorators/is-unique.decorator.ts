@@ -2,11 +2,15 @@ import {
   registerDecorator,
   ValidationArguments,
   ValidationOptions,
+  ValidatorConstraint,
 } from 'class-validator';
 import { DatabaseConstraint } from '../constraints/database.constraint';
 import { ModelMappingTable } from '../enums/model-mapping.enum';
 import { IsUniqueMode } from '../enums/is_unique_mode.enum';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
+@ValidatorConstraint({ async: true })
 export class IsUniqueConstraint extends DatabaseConstraint {
   checkRecord(record: any): boolean {
     return !record;
@@ -20,15 +24,14 @@ export class IsUniqueConstraint extends DatabaseConstraint {
 export function IsUnique(
   entity: ModelMappingTable,
   property: string,
-  validationOptions?: ValidationOptions,
-  mode: IsUniqueMode = IsUniqueMode.INSENSITIVE,
+  validationOptions?: ValidationOptions
 ) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [entity, property, mode],
+      constraints: [entity, property],
       validator: IsUniqueConstraint,
     });
   };
