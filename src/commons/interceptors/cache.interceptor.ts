@@ -11,6 +11,7 @@ import { Request } from 'express';
 import { RedisService } from '../services/redis.service';
 import { ConfigService } from '@nestjs/config';
 import { RedisServiceProvider } from '../providers/redis-service.provider';
+import * as crypto from 'crypto';
 
 /**
  * Interceptor that provides caching functionality for requests.
@@ -51,7 +52,7 @@ export class CacheInterceptor implements NestInterceptor {
 
         return next.handle().pipe(
             tap(async (response) => {
-                await redis.set(key, JSON.stringify(response), ttl);
+                redis.set(key, JSON.stringify(response), ttl);
             }),
         );
     }
@@ -73,9 +74,32 @@ export class CacheInterceptor implements NestInterceptor {
      * @param request - The incoming request.
      * @returns The cache key.
      */
+    // private generateKey(request: Request): string {
+    //     const { method, originalUrl, body, params, query } = request;
+    //     const key = `${method}-${originalUrl}-${JSON.stringify(body)}-${JSON.stringify(params)}-${JSON.stringify(query)}`;
+    //     return key;
+    // }
     private generateKey(request: Request): string {
-        const { method, originalUrl, body, params, query } = request;
-        const key = `${method}-${originalUrl}-${JSON.stringify(body)}-${JSON.stringify(params)}-${JSON.stringify(query)}`;
-        return key;
+        const { method, originalUrl, query, params, body } = request;
+    
+        // Structure hiérarchique : "namespace" - "resource" - hash du body - hash des params - hash des query params
+        const resource = originalUrl || 'root';
+    
+        const namespace = `${method.toUpperCase()}-${resource}`;
+    
+        const queryHash = crypto
+            .createHash('md5')
+            .update(JSON.stringify(query))
+            .digest('hex');
+        const paramsHash = crypto
+            .createHash('md5')
+            .update(JSON.stringify(params))
+            .digest('hex');
+        const bodyHash = crypto
+            .createHash('md5')
+            .update(JSON.stringify(body))
+            .digest('hex');
+    
+        return `${namespace}-${bodyHash}-${paramsHash}-${queryHash}`;
     }
 }

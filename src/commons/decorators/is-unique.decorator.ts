@@ -20,7 +20,6 @@ export class IsUniqueConstraint extends DatabaseConstraint {
 export function IsUnique(
   entity: ModelMappingTable,
   property: string,
-  options?: any, // Ajout des options
   validationOptions?: ValidationOptions,
   mode: IsUniqueMode = IsUniqueMode.INSENSITIVE,
 ) {
@@ -29,7 +28,7 @@ export function IsUnique(
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [entity, property, mode, options],
+      constraints: [entity, property, mode],
       validator: IsUniqueConstraint,
     });
   };
